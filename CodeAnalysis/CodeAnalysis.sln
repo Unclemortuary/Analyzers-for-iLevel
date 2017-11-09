@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.BestPractices", "iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj", "{CBA00023-E9B2-44AE-902E-3BF37A4703AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.BestPractices.Tests", "iLevel.CodeAnalysis.BestPractices.Tests\iLevel.CodeAnalysis.BestPractices.Tests.csproj", "{5D44FCF1-0E9E-4970-84E2-664D3D4E51AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{CBA00023-E9B2-44AE-902E-3BF37A4703AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBA00023-E9B2-44AE-902E-3BF37A4703AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBA00023-E9B2-44AE-902E-3BF37A4703AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D44FCF1-0E9E-4970-84E2-664D3D4E51AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D44FCF1-0E9E-4970-84E2-664D3D4E51AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D44FCF1-0E9E-4970-84E2-664D3D4E51AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D44FCF1-0E9E-4970-84E2-664D3D4E51AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4F85AF74-B258-4AF6-8FFF-2C1DCC69FD68}
 	EndGlobalSection
 EndGlobal
