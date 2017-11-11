@@ -15,13 +15,15 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests
     [TestClass]
     public class ServiceMethodInLoopExecutionTests : CodeFixVerifier
     {
+        protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
+            => new ServiceMethodInLoopExecutionAnalyzer();
+
         const string ServiceClass = @"
 namespace iLevel.ViewPoint.BusinessLogic.Services
 {
     public interface ISomethingService
     {
         string Method();
-        int Property { get; set; }
     }
 }
 ";
@@ -32,13 +34,9 @@ namespace iLevel.ViewPoint.BusinessLogic.Proviers
     public interface ISomethingProvider
     {
         string Method();
-        int Property { get; set; }
     }
 }
 ";
-
-        protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
-            => new ServiceMethodInLoopExecutionAnalyzer();
 
         [TestMethod]
         public void ServiceMethodOutOfLoop_NoWarnings()
@@ -50,8 +48,6 @@ class Program
     public void Main(ISomethingService service)
     {
         service.Method();
-        int i = service.Property;
-        service.Property = i;
     }
 }";
             VerifyCSharpDiagnostic(GetFilesBatch(test));
@@ -69,27 +65,74 @@ class Program
         foreach (var item in new[] { 1 })
         {
             service.Method();
-            int i = service.Property;
-            service.Property = i;
         }        
     }
 }";
-            DiagnosticResult getDiagnosticResult(int line, int col) => new DiagnosticResult
-            {
-                Id = "ILVL0002",
-                Message = "Service method shouldn't be executed in a loop",
-                Severity = DiagnosticSeverity.Warning,
-                Locations = new[] { new DiagnosticResultLocation("Test2.cs", line, col) }
-            };
+            VerifyCSharpDiagnostic(GetFilesBatch(test), GetDiagnosticResult(9, 13));
+        }
 
-            VerifyCSharpDiagnostic(GetFilesBatch(test), new[]
-            {
-                getDiagnosticResult(9, 24),
-                getDiagnosticResult(10, 24),
-                getDiagnosticResult(11, 24)
-            });
+        [TestMethod]
+        public void ServiceMethodInForLoop_ShowWarnings()
+        {
+            const string test = @"
+using iLevel.ViewPoint.BusinessLogic.Services
+class Program
+{    
+    public void Main(ISomethingService service)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            service.Method();
+        }        
+    }
+}";
+            VerifyCSharpDiagnostic(GetFilesBatch(test), GetDiagnosticResult(9, 13));
+        }
+
+        [TestMethod]
+        public void ServiceMethodInWileLoop_ShowWarnings()
+        {
+            const string test = @"
+using iLevel.ViewPoint.BusinessLogic.Services
+class Program
+{    
+    public void Main(ISomethingService service)
+    {
+        while(true)
+        {
+            service.Method();
+        }        
+    }
+}";
+            VerifyCSharpDiagnostic(GetFilesBatch(test), GetDiagnosticResult(9, 13));
+        }
+
+        [TestMethod]
+        public void ServiceMethodInDoLoop_ShowWarnings()
+        {
+            const string test = @"
+using iLevel.ViewPoint.BusinessLogic.Services
+class Program
+{    
+    public void Main(ISomethingService service)
+    {
+        do
+        {
+            service.Method();
+        } while(true);       
+    }
+}";
+            VerifyCSharpDiagnostic(GetFilesBatch(test), GetDiagnosticResult(9, 13));
         }
 
         private static string[] GetFilesBatch(string test) => new[] { ServiceClass, NotServiceClass, test };
+
+        private static DiagnosticResult GetDiagnosticResult(int line, int col) => new DiagnosticResult
+        {
+            Id = "ILVL0002",
+            Message = "Service method shouldn't be executed in a loop because there is no guarantee that cache has initialized properly",
+            Severity = DiagnosticSeverity.Warning,
+            Locations = new[] { new DiagnosticResultLocation("Test2.cs", line, col) }
+        };
     }
 }
