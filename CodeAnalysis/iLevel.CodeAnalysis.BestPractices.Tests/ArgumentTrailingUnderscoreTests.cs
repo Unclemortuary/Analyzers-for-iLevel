@@ -11,10 +11,16 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests
     [TestClass]
     public class ArgumentTrailingUnderscoreTests : CodeFixVerifier
     {
+        protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
+            => new ArgumentTrailingUnderscoreAnalyzer();
+
+        protected override CodeFixProvider GetCSharpCodeFixProvider()
+            => new ArgumentTrailingUnderscoreFixProvider();
+
         [TestMethod]
         public void EmptyMethod_ShowWarning()
         {
-           const string test = @"
+            const string test = @"
 class Class
 {
     public void Method(string arg_) { }
@@ -133,12 +139,5 @@ class Executor
 }";
             VerifyCSharpFix(test, fixtest);
         }
-       
-
-        protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
-            => new ArgumentTrailingUnderscoreAnalyzer();
-
-        protected override CodeFixProvider GetCSharpCodeFixProvider()
-            => new ArgumentTrailingUnderscoreFixProvider();
     }
 }
