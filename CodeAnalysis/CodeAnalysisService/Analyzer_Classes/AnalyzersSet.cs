@@ -11,7 +11,7 @@ namespace CodeAnalysisService.Analyzer_Classes
 {
     public class AnalyzersSet
     {
-        public static AnalyzersSet instance = null;
+        private static  AnalyzersSet instance = null;
 
         private Dictionary<string, DiagnosticAnalyzer> _analyzers = new Dictionary<string, DiagnosticAnalyzer>();
 
@@ -21,7 +21,7 @@ namespace CodeAnalysisService.Analyzer_Classes
             _analyzers.Add("ILVL0002", new ServiceMethodInLoopExecutionAnalyzer());
         }
 
-        public AnalyzersSet Init()
+        public static AnalyzersSet Init()
         {
             if(instance == null)
             {

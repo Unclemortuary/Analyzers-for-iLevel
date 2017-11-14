@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeAnalysisService.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -7,13 +8,12 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace CodeAnalysisService.Analyzer_Classes
 {
-    public class AnalysisCustomizer
+    public abstract class AnalysisCustomizer
     {
-
-        private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-        private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
-        private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
-        private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
+        protected static readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        protected static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
+        protected static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
+        protected static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
 
         internal static string DefaultFilePathPrefix = "Any";
         internal static string CSharpDefaultFileExt = "cs";
@@ -31,7 +31,7 @@ namespace CodeAnalysisService.Analyzer_Classes
             {
                 try
                 {
-                    AnalyzersSet.instance.Init().GetAnalyzerById(value);
+                    AnalyzersSet.Init().GetAnalyzerById(value);
                     _analyzerId = value;
                 }
                 catch (ArgumentException)
@@ -39,11 +39,6 @@ namespace CodeAnalysisService.Analyzer_Classes
                     Console.WriteLine(Environment.NewLine + "Attempt to use non existing Analyzer Id");
                 }
             }
-        }
-
-        AnalysisCustomizer()
-        {
-
         }
     }
 }
