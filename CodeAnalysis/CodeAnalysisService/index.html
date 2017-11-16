@@ -5,23 +5,48 @@
     <meta name="viewport" content="width=device-width" />
     <title>Index</title>
     <style type="text/css">
-        #namesContainer {
+        #resultsContainer {
             width: 300px;
             float: left;
         }
 
+        .formContainer {
+            width: 300px;
+            float: right;
+        }
+
+        .StartDiagnostic {
+            width: 400px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
 
+    <div>
+        <div>
 
-    <div id="namesContainer">
-        <h2>String must be downhere</h2>
-        <ol id="names"></ol>
+            <div class="formContainer">
+                
+                    <input type="file" multiple accept=".cs" name="upload" id="uploadFiles" /><br />
+                    <button id="submit">Submit</button>
+            </div>
+
+        </div>
+        <div>
+            <button class="StartDiagnostic">Start Diagnostic</button>
+        </div>
     </div>
 
-    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
-    <script src="~/Scripts/Custom/DiagnosticResultLoader.js"></script>
+
+    <div id="resutsContainer">
+        <h2></h2>
+        <ol id="result"></ol>
+    </div>
+
+    <script src="Scripts/jquery-1.10.2.min.js"></script>
+    <script src="Scripts/Custom/DiagnosticResultLoader.js"></script>
+    
 
 </body>
 </html>
