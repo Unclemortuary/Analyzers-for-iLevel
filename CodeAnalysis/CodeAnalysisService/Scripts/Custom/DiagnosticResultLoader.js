@@ -1,11 +1,9 @@
 ﻿(function () {
 
     var baseUri = "api/analyzer";
-    var solutionLocation = "";
 
     $(document).ready(function () {
         $("#submit").on("click", postSources);
-        $(".StartDiagnostic").on("click", getDiagnostic);
     });
 
     
@@ -28,14 +26,16 @@
 
                     statusCode: {
                         201: function (message) {
-                            alert(message);
+                            alert("Analyzed succesfully");
                         },
                         400: function () {
                             alert("Bad Request. Operation not executed");
                         }
                     },
                     success: function (data, textStatus, xhr) {
-                        solutionLocation = xhr.getResponseHeader("Location");
+                        var result = $("#result");
+                        result.empty();
+                        result.append("<ol>" + data + "</ol>");
                     },
                     error: function (xhr, status, p3) {
                         alert(p3);
