@@ -45,30 +45,33 @@ namespace CodeAnalysisService.Controllers
                     normalFilesList.Add(text);
                 }
             }
+
             if (wrongFilesList.Count > 0)
             {
                 return Request.CreateResponse(HttpStatusCode.BadRequest, "Some of files has not appropriate format");
             }
             else
             {
-                string result = GetDiagnostic(normalFilesList);
-                if(result == "")
-                {
-                    return Request.CreateResponse(HttpStatusCode.Created, "Files not have any warnings or errors");
-                }
                 return Request.CreateResponse(HttpStatusCode.Created, GetDiagnostic(normalFilesList));
             }
         }
 
 
-        private string GetDiagnostic(List<string> list)
+        internal string GetDiagnostic(List<string> list)
         {
-            var solutionCreator = new SolutionCreator(list.ToArray());
-            var document = solutionCreator.GetDocuments();
-            var usedAnalyzer = AnalyzersSet.Init().GetAnalyzerById(solutionCreator.AnalyzerId);
-            var diagnosticResult = Analyzer.AnalyzeSolution(usedAnalyzer, document);
-            var returnableResult = Analyzer.FormatDiagnostics(usedAnalyzer, diagnosticResult);
-            return returnableResult;
+            if (list == null || list.Count == 0)
+                throw new ArgumentNullException("list of sources is empty");
+            else
+            {
+                var solutionCreator = new SolutionCreator(list.ToArray());
+                var document = solutionCreator.GetDocuments();
+                var usedAnalyzer = AnalyzersSet.Init().GetAnalyzerById(solutionCreator.AnalyzerId);
+                var diagnosticResult = Analyzer.AnalyzeSolution(usedAnalyzer, document);
+                var returnableResult = Analyzer.FormatDiagnostics(usedAnalyzer, diagnosticResult);
+                if (returnableResult == "")
+                    return "Files not have any warnings or errors";
+                return returnableResult;
+            }
         }
     }
 }

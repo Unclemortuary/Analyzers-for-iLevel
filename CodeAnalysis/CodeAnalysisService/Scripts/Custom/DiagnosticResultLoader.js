@@ -42,7 +42,7 @@
                     }
                 });
             } else {
-                alert("Браузер не поддерживает загрузку файлов HTML5!");
+                alert("Brouser does not support upploading HTML5 files");
             }
         }
     }
