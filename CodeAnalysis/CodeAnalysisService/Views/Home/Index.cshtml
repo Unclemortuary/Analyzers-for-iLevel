@@ -1,0 +1,36 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <style type="text/css">
+        .wrapper {
+            max-width: 500px;
+            border: 1px solid green;
+            margin: 0 auto;
+        }
+
+        .formContainer {
+            text-align: center;
+            padding: 50px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="formContainer">
+            <input type="file" accept=".cs" name="upload" id="uploadFiles" /><br />
+            <button id="submit">Submit and get resutlt</button>
+        </div>
+        <div>
+            <ul id="names"></ul>
+        </div>
+    </div>
+</body>
+</html>
