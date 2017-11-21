@@ -33,8 +33,9 @@ namespace CodeAnalysisService.CommonService
 
         public DiagnosticAnalyzer GetAnalyzerById(string id)
         {
-            if (_analyzers.Keys.Contains(id))
-                return _analyzers[id];
+            DiagnosticAnalyzer analyzer;
+            if (_analyzers.TryGetValue(id, out analyzer))
+                return analyzer;
             else
                 throw new ArgumentException("Analyzer with given Id is not exist");
         }

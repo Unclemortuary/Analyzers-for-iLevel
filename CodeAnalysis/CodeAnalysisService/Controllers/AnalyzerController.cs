@@ -16,7 +16,6 @@ namespace CodeAnalysisService.Controllers
     {
         private readonly IDiagnosticService _diagnosticService;
 
-
         public async Task<HttpResponseMessage> Post()
         {
             if (!Request.Content.IsMimeMultipartContent())

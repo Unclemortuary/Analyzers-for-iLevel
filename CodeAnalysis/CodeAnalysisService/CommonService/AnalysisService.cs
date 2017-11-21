@@ -14,11 +14,18 @@ namespace CodeAnalysisService.CommonService
 {
     public interface IDiagnosticService
     {
-
+        IEnumerable<string> GetCompilationDiagnostic(string[] sources);
     }
 
     public class AnalysisService : IDiagnosticService
     {
+        private ISolutionCreator _solutionCreator;
+
+        public IEnumerable<string> GetCompilationDiagnostic(string[] sources)
+        {
+            List<string> compilationDiagnostics = new List<string>();
+            return compilationDiagnostics;
+        }
 
         public Diagnostic[] GetDiagnostic(DiagnosticAnalyzer analyzer, Document[] documents)
         {
