@@ -31,6 +31,16 @@
         <div>
             <ul id="names"></ul>
         </div>
+        <div>
+            @if (ViewBag.Errors != null)
+            {
+                foreach (var error in ViewBag.Errors)
+                {
+                    <ol>@error.FileName</ol>
+                    <ol>@error.WarningText</ol>
+                }
+            }
+        </div>
     </div>
 </body>
 </html>

@@ -7,7 +7,7 @@ using iLevel.ViewPoint.CodeAnalysis.BestPractices;
 using iLevel.CodeAnalysis.BestPractices;
 
 
-namespace CodeAnalysisService.Analyzer_Classes
+namespace CodeAnalysisService.CommonService
 {
     public class AnalyzersSet
     {

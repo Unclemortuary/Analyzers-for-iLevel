@@ -3,16 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using CodeAnalysisService.Models;
-using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 using System.Text;
 
-namespace CodeAnalysisService.Analyzer_Classes
+namespace CodeAnalysisService.CommonService
 {
-    public static class Analyzer
+    public interface IDiagnosticService
     {
-        public static Diagnostic[] AnalyzeSolution(DiagnosticAnalyzer analyzer, Document[] documents)
+
+    }
+
+    public class AnalysisService : IDiagnosticService
+    {
+
+        public Diagnostic[] GetDiagnostic(DiagnosticAnalyzer analyzer, Document[] documents)
         {
             var projects = new HashSet<Project>();
             foreach (var document in documents)
@@ -51,12 +59,12 @@ namespace CodeAnalysisService.Analyzer_Classes
             return results;
         }
 
-        private static Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics)
+        private Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics)
         {
             return diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
         }
 
-        public static string FormatDiagnostics(DiagnosticAnalyzer analyzer, params Diagnostic[] diagnostics)
+        public string FormatDiagnostics(DiagnosticAnalyzer analyzer, params Diagnostic[] diagnostics)
         {
             var builder = new StringBuilder();
             for (int i = 0; i < diagnostics.Length; ++i)
@@ -77,10 +85,6 @@ namespace CodeAnalysisService.Analyzer_Classes
                         }
                         else
                         {
-                            /*
-                            Assert.IsTrue(location.IsInSource,
-                                $"Test base does not currently handle diagnostics in metadata locations. Diagnostic in metadata: {diagnostics[i]}\r\n");
-                                */
 
                             string resultMethodName = diagnostics[i].Location.SourceTree.FilePath.EndsWith(".cs") ? "GetCSharpResultAt" : "GetBasicResultAt";
                             var linePosition = diagnostics[i].Location.GetLineSpan().StartLinePosition;
