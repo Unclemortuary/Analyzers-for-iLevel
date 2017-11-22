@@ -19,102 +19,40 @@ namespace CodeAnalysisService.CommonService
 
     public class AnalysisService : IDiagnosticService
     {
-        private ISolutionCreator _solutionCreator;
+        private readonly ISolutionCreator _solutionCreator;
+
+        public AnalysisService(ISolutionCreator solutionCreator)
+        {
+            _solutionCreator = solutionCreator;
+        }
 
         public IEnumerable<string> GetCompilationDiagnostic(string[] sources)
         {
             List<string> compilationDiagnostics = new List<string>();
-            return compilationDiagnostics;
+            var syntaxTrees = _solutionCreator.GetSyntaxTrees(sources);
+            var diagnostics = _solutionCreator.GetCompilation(syntaxTrees, null).GetDiagnostics();
+            return FormatDiagnostics(SortDiagnostics(diagnostics, DiagnosticSeverity.Error));
         }
 
-        public Diagnostic[] GetDiagnostic(DiagnosticAnalyzer analyzer, Document[] documents)
+        private Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics, DiagnosticSeverity severetyType)
         {
-            var projects = new HashSet<Project>();
-            foreach (var document in documents)
-            {
-                projects.Add(document.Project);
-            }
-
-            var diagnostics = new List<Diagnostic>();
-            foreach (var project in projects)
-            {
-                var compilationWithAnalyzers = project.GetCompilationAsync().Result.WithAnalyzers(ImmutableArray.Create(analyzer));
-                var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
-                foreach (var diag in diags)
-                {
-                    if (diag.Location == Location.None || diag.Location.IsInMetadata)
-                    {
-                        diagnostics.Add(diag);
-                    }
-                    else
-                    {
-                        for (int i = 0; i < documents.Length; i++)
-                        {
-                            var document = documents[i];
-                            var tree = document.GetSyntaxTreeAsync().Result;
-                            if (tree == diag.Location.SourceTree)
-                            {
-                                diagnostics.Add(diag);
-                            }
-                        }
-                    }
-                }
-            }
-
-            var results = SortDiagnostics(diagnostics);
-            diagnostics.Clear();
-            return results;
+            return diagnostics.Where(d => d.Severity.Equals(severetyType)).
+                OrderBy(d => d.Location.SourceSpan.Start).ToArray();
         }
 
-        private Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics)
-        {
-            return diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
-        }
-
-        public string FormatDiagnostics(DiagnosticAnalyzer analyzer, params Diagnostic[] diagnostics)
+        public IEnumerable<string> FormatDiagnostics(params Diagnostic[] diagnostics)
         {
             var builder = new StringBuilder();
+            List<string> sortedDiagnostic = new List<string>();
             for (int i = 0; i < diagnostics.Length; ++i)
             {
                 builder.AppendLine("// " + diagnostics[i].ToString());
 
-                var analyzerType = analyzer.GetType();
-                var rules = analyzer.SupportedDiagnostics;
-
-                foreach (var rule in rules)
-                {
-                    if (rule != null && rule.Id == diagnostics[i].Id)
-                    {
-                        var location = diagnostics[i].Location;
-                        if (location == Location.None)
-                        {
-                            builder.AppendFormat("GetGlobalResult({0}.{1})", analyzerType.Name, rule.Id);
-                        }
-                        else
-                        {
-
-                            string resultMethodName = diagnostics[i].Location.SourceTree.FilePath.EndsWith(".cs") ? "GetCSharpResultAt" : "GetBasicResultAt";
-                            var linePosition = diagnostics[i].Location.GetLineSpan().StartLinePosition;
-
-                            builder.AppendFormat("{0}({1}, {2}, {3}.{4})",
-                                resultMethodName,
-                                linePosition.Line + 1,
-                                linePosition.Character + 1,
-                                analyzerType.Name,
-                                rule.Id);
-                        }
-
-                        if (i != diagnostics.Length - 1)
-                        {
-                            builder.Append(',');
-                        }
-
-                        builder.AppendLine();
-                        break;
-                    }
-                }
+                var location = diagnostics[i].Location;
+                sortedDiagnostic.Add(builder.ToString());
+                builder.Clear();
             }
-            return builder.ToString();
+            return sortedDiagnostic;
         }
     }
 
