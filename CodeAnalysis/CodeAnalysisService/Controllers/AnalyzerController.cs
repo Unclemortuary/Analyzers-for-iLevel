@@ -1,5 +1,5 @@
-﻿using CodeAnalysisService.Models;
-using CodeAnalysisService.CommonService;
+﻿using CodeAnalysis.BusinessLogicLayer;
+using CodeAnalysisService.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,13 @@ namespace CodeAnalysisService.Controllers
     public class AnalyzerController : ApiController
     {
         private readonly IDiagnosticService _diagnosticService;
+        private readonly ISolutionCreator _solutionCreator;
+
+        public AnalyzerController(IDiagnosticService diagnosticService, ISolutionCreator solutionCreator)
+        {
+            _diagnosticService = diagnosticService;
+            _solutionCreator = solutionCreator;
+        }
 
         public async Task<HttpResponseMessage> Post()
         {

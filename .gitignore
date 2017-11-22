@@ -33,6 +33,9 @@ bld/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+#Axo test reports
+.axoCover/
+
 # NUNIT
 *.VisualState.xml
 TestResult.xml

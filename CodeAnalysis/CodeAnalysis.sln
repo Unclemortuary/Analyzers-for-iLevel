@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.CodeAna
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.CodeAnalysisService.Tests", "CodeAnalysisService.Tests\iLevel.CodeAnalysis.CodeAnalysisService.Tests.csproj", "{D3502BC4-84E5-41A7-A146-2571D6CF382F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.BusinessLogicLayer", "iLevel.CodeAnalysis.BusinessLogicLayer\iLevel.CodeAnalysis.BusinessLogicLayer.csproj", "{1B48A075-8A9E-4005-82C5-4132742AB25D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D3502BC4-84E5-41A7-A146-2571D6CF382F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3502BC4-84E5-41A7-A146-2571D6CF382F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3502BC4-84E5-41A7-A146-2571D6CF382F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B48A075-8A9E-4005-82C5-4132742AB25D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B48A075-8A9E-4005-82C5-4132742AB25D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B48A075-8A9E-4005-82C5-4132742AB25D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B48A075-8A9E-4005-82C5-4132742AB25D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

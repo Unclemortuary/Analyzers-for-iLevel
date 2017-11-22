@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using CodeAnalysisService.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,27 +8,20 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Text;
 
-namespace CodeAnalysisService.CommonService
+namespace CodeAnalysis.BusinessLogicLayer
 {
     public interface IDiagnosticService
     {
-        IEnumerable<string> GetCompilationDiagnostic(string[] sources);
+        IEnumerable<string> GetCompilationDiagnostic(CSharpCompilation compilation);
     }
 
-    public class AnalysisService : IDiagnosticService
+    public class DiagnosticBLL : IDiagnosticService
     {
-        private readonly ISolutionCreator _solutionCreator;
 
-        public AnalysisService(ISolutionCreator solutionCreator)
-        {
-            _solutionCreator = solutionCreator;
-        }
-
-        public IEnumerable<string> GetCompilationDiagnostic(string[] sources)
+        public IEnumerable<string> GetCompilationDiagnostic(CSharpCompilation compilation)
         {
             List<string> compilationDiagnostics = new List<string>();
-            var syntaxTrees = _solutionCreator.GetSyntaxTrees(sources);
-            var diagnostics = _solutionCreator.GetCompilation(syntaxTrees, null).GetDiagnostics();
+            var diagnostics = compilation.GetDiagnostics();
             return FormatDiagnostics(SortDiagnostics(diagnostics, DiagnosticSeverity.Error));
         }
 

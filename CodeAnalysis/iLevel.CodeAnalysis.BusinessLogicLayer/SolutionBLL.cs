@@ -8,15 +8,15 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace CodeAnalysisService.CommonService
+namespace CodeAnalysis.BusinessLogicLayer
 {
     public interface ISolutionCreator
     {
-        IEnumerable<SyntaxTree> GetSyntaxTrees(string[] sources);
+        IEnumerable<SyntaxTree> GetSyntaxTrees(string[] sources, string defaultFileName);
         CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName);
     }
 
-    public class SolutionCreator : ISolutionCreator
+    public class SolutionBLL : ISolutionCreator
     {
         private readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         private readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
@@ -32,14 +32,14 @@ namespace CodeAnalysisService.CommonService
         public string ProjectName { get { return _defaultProjectName; } set { _defaultProjectName = value; } }
 
 
-        public IEnumerable<SyntaxTree> GetSyntaxTrees(string[] sources)
+        public IEnumerable<SyntaxTree> GetSyntaxTrees(string[] sources, string defaultFileName)
         {
             List<SyntaxTree> list = new List<SyntaxTree>(sources.Length);
 
             for (int i = 0; i < sources.Length; i++)
             {
                 var stringText = SourceText.From(sources[i]);
-                list.Add(SyntaxFactory.ParseSyntaxTree(text: stringText, options: null, path: "TestFile"));
+                list.Add(SyntaxFactory.ParseSyntaxTree(text: stringText, options: null, path: defaultFileName));
             }
 
             return list;
