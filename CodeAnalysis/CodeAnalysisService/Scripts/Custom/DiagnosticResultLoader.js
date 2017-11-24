@@ -19,7 +19,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: baseUri,
+                    url: "Home/Upload",
                     contentType: false,
                     processData: false,
                     data: data,
@@ -33,9 +33,11 @@
                         }
                     },
                     success: function (data, textStatus, xhr) {
-                        var result = $("#result");
+                        var result = $("#names");
                         result.empty();
-                        result.append("<ol>" + data + "</ol>");
+                        for (var i = 0; i < data.length; i++) {
+                            result.append("<ol>" + data[i] + "</ol>");
+                        }
                     },
                     error: function (xhr, status, p3) {
                         alert(p3);
@@ -46,32 +48,4 @@
             }
         }
     }
-    
-
-    function getDiagnostic(diagnostic) {
-        if (solutionLocation == "")
-        {
-            alert("Select and submit files first");
-        }
-        else
-        {
-            $.ajax({
-                type: "GET",
-                url: solutionLocation,
-
-                success: function (data) {
-                    $("#result").text(data);
-                },
-
-                error: function (xhr) {
-                    if (xhr.status == "400") {
-                        alert("Server error");
-                        $("#result").text(xhr.responseText);
-                    }
-                }
-            });
-        }
-    }
-
-
 })();

@@ -25,22 +25,14 @@
 <body>
     <div class="wrapper">
         <div class="formContainer">
-            <input type="file" accept=".cs" name="upload" id="uploadFiles" /><br />
+            <input type="file" accept=".cs" multiple name="upload" id="uploadFiles" formenctype="multipart/form-data" /><br />
             <button id="submit">Submit and get resutlt</button>
         </div>
         <div>
             <ul id="names"></ul>
         </div>
-        <div>
-            @if (ViewBag.Errors != null)
-            {
-                foreach (var error in ViewBag.Errors)
-                {
-                    <ol>@error.FileName</ol>
-                    <ol>@error.WarningText</ol>
-                }
-            }
-        </div>
     </div>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/Custom/DiagnosticResultLoader.js"></script>
 </body>
 </html>

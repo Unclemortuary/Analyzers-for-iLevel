@@ -35,14 +35,16 @@ namespace CodeAnalysis.BusinessLogicLayer
         {
             var builder = new StringBuilder();
             List<string> sortedDiagnostic = new List<string>();
-            for (int i = 0; i < diagnostics.Length; ++i)
-            {
-                builder.AppendLine("// " + diagnostics[i].ToString());
 
-                var location = diagnostics[i].Location;
+            foreach (var diagnostic in diagnostics)
+            {
+                builder.AppendLine("// " + diagnostic.ToString());
+
+                var location = diagnostic.Location;
                 sortedDiagnostic.Add(builder.ToString());
                 builder.Clear();
             }
+            
             return sortedDiagnostic;
         }
     }

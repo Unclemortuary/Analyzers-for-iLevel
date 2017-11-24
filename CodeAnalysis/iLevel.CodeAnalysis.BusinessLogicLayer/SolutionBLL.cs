@@ -7,21 +7,25 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
+using System.Threading;
 
 namespace CodeAnalysis.BusinessLogicLayer
 {
     public interface ISolutionCreator
     {
-        IEnumerable<SyntaxTree> GetSyntaxTrees(string[] sources, string defaultFileName);
+        IEnumerable<SyntaxTree> GetSyntaxTrees(Dictionary<string, string> sources);
         CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName);
     }
 
     public class SolutionBLL : ISolutionCreator
     {
+
         private readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         private readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
         private readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         private readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
+
 
         private string _defaultFilePrefix = "Service";
         private string _cSharpDefaultFileExt = "cs";
@@ -32,14 +36,14 @@ namespace CodeAnalysis.BusinessLogicLayer
         public string ProjectName { get { return _defaultProjectName; } set { _defaultProjectName = value; } }
 
 
-        public IEnumerable<SyntaxTree> GetSyntaxTrees(string[] sources, string defaultFileName)
+        public IEnumerable<SyntaxTree> GetSyntaxTrees(Dictionary<string, string> sources)
         {
-            List<SyntaxTree> list = new List<SyntaxTree>(sources.Length);
+            List<SyntaxTree> list = new List<SyntaxTree>(sources.Count);
 
-            for (int i = 0; i < sources.Length; i++)
+            foreach (var fileName in sources.Keys)
             {
-                var stringText = SourceText.From(sources[i]);
-                list.Add(SyntaxFactory.ParseSyntaxTree(text: stringText, options: null, path: defaultFileName));
+                var stringText = SourceText.From(sources[fileName]);
+                list.Add(SyntaxFactory.ParseSyntaxTree(stringText, null, fileName));
             }
 
             return list;

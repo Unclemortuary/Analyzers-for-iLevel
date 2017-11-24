@@ -23,6 +23,8 @@ namespace CodeAnalysisService.Controllers
             _solutionCreator = solutionCreator;
         }
 
+
+
         public async Task<HttpResponseMessage> Post()
         {
             if (!Request.Content.IsMimeMultipartContent())
@@ -34,7 +36,7 @@ namespace CodeAnalysisService.Controllers
             await Request.Content.ReadAsMultipartAsync(provider);
 
             List<string> wrongFilesList = new List<string>();
-            List<string> normalFilesList = new List<string>();
+            Dictionary<string, string> normalFilesList = new Dictionary<string, string>();
 
             foreach (var file in provider.Contents)
             {
@@ -48,7 +50,7 @@ namespace CodeAnalysisService.Controllers
                 else
                 {
                     string text = await file.ReadAsStringAsync();
-                    normalFilesList.Add(text);
+                    normalFilesList.Add(filename, text);
                 }
             }
 
@@ -59,7 +61,9 @@ namespace CodeAnalysisService.Controllers
             }
             else
             {
-                return Request.CreateResponse(HttpStatusCode.NoContent);
+                var compilation = _solutionCreator.GetCompilation(_solutionCreator.GetSyntaxTrees(normalFilesList), assemblyName: "");
+                var result = _diagnosticService.GetCompilationDiagnostic(compilation);
+                return Request.CreateResponse(HttpStatusCode.Created, result.ToString());
             }
         }
     }

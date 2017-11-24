@@ -8,8 +8,6 @@ namespace CodeAnalysisService.Tests
     [TestClass]
     public class AnalyzerControllerTests
     {
-        private AnalyzerController instance = new AnalyzerController();
-        private const string okMessage = "Files not have any warnings or errors";
-
+        
     }
 }
