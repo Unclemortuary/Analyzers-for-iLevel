@@ -1,6 +1,7 @@
 using System;
 using CodeAnalysis.BusinessLogicLayer;
 using Unity;
+using iLevel.CodeAnalysis.BusinessLogicLayer;
 
 namespace CodeAnalysisService
 {
@@ -27,9 +28,7 @@ namespace CodeAnalysisService
 
         public static void RegisterTypes(IUnityContainer container)
         {
-            container.RegisterType<IDiagnosticService, DiagnosticBLL>();
-            container.RegisterType<ISolutionCreator, SolutionBLL>();
-            
+            ServiceRegistrator.RegisterServices(container);
         }
     }
 }

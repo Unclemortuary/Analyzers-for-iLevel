@@ -13,6 +13,8 @@ namespace CodeAnalysisService.CommonService
     {
         private static  AnalyzersSet instance = null;
 
+        private static Object someLock = new Object();
+
         private Dictionary<string, DiagnosticAnalyzer> _analyzers = new Dictionary<string, DiagnosticAnalyzer>();
 
         private AnalyzersSet()
@@ -25,9 +27,12 @@ namespace CodeAnalysisService.CommonService
         {
             if(instance == null)
             {
-                instance = new AnalyzersSet();
+                lock (someLock)
+                {
+                    if (instance == null)
+                        instance = new AnalyzersSet();
+                }
             }
-
             return instance;
         }
 
