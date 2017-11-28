@@ -23,37 +23,10 @@ namespace CodeAnalysis.BusinessLogicLayer
         SyntaxTree ParseSyntaxTree(SourceText text, ParseOptions options = null, string path = "", CancellationToken cancellationToken = default(CancellationToken));
         SourceText GetSourceText(string text, Encoding encoding = null, SourceHashAlgorithm checksumAlgorithm = SourceHashAlgorithm.Sha1);
         CSharpCompilation Create(string assemblyName, IEnumerable<SyntaxTree> syntaxTrees = null, IEnumerable<MetadataReference> references = null, CSharpCompilationOptions options = null);
-        CSharpCompilation AddReferences(params MetadataReference[] references);
-        CSharpCompilation AddReferences(IEnumerable<MetadataReference> references);
-        CSharpCompilation AddSyntaxTrees(params SyntaxTree[] trees);
-        CSharpCompilation AddSyntaxTrees(IEnumerable<SyntaxTree> trees);
     }
 
     internal class CustomSyntaxFactory : ICustomSyntaxFactory
     {
-        public CSharpCompilation AddReferences(params MetadataReference[] references)
-        {
-            CSharpCompilation compilation = CSharpCompilation.Create("");
-            return compilation.AddReferences(references);
-        }
-
-        public CSharpCompilation AddReferences(IEnumerable<MetadataReference> references)
-        {
-            CSharpCompilation compilation = CSharpCompilation.Create("");
-            return compilation.AddReferences(references);
-        }
-
-        public CSharpCompilation AddSyntaxTrees(params SyntaxTree[] trees)
-        {
-            CSharpCompilation compilation = CSharpCompilation.Create("");
-            return compilation.AddSyntaxTrees(trees);
-        }
-
-        public CSharpCompilation AddSyntaxTrees(IEnumerable<SyntaxTree> trees)
-        {
-            CSharpCompilation compilation = CSharpCompilation.Create("");
-            return compilation.AddSyntaxTrees(trees);
-        }
 
         public CSharpCompilation Create(string assemblyName, IEnumerable<SyntaxTree> syntaxTrees = null, IEnumerable<MetadataReference> references = null, CSharpCompilationOptions options = null)
         {
@@ -88,7 +61,7 @@ namespace CodeAnalysis.BusinessLogicLayer
 
         private string _defaultFilePrefix = "Service";
         private string _cSharpDefaultFileExt = "cs";
-        private string _defaultProjectName = "TestProject";
+        private string _defaultProjectName = "DefaultProject";
 
         public string FilePrefix { get { return _defaultFilePrefix; } set { _defaultFilePrefix = value; } }
         public string FileExt { get { return _cSharpDefaultFileExt; } set { _cSharpDefaultFileExt = value; } }
@@ -114,9 +87,9 @@ namespace CodeAnalysis.BusinessLogicLayer
             if (syntaxTrees.Count() == 0)
                 return null;
 
-            return _customSyntaxFactory.Create(assemblyName)
-                .AddReferences(CorlibReference, SystemCoreReference, CSharpSymbolsReference, CodeAnalysisReference)
-                .AddSyntaxTrees(syntaxTrees);
+            return _customSyntaxFactory.Create(assembly, 
+                syntaxTrees, 
+                new MetadataReference[] { CorlibReference, SystemCoreReference, CSharpSymbolsReference, CodeAnalysisReference });
         }
     }
 }

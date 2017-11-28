@@ -183,7 +183,6 @@
   <ItemGroup>
     <Compile Include="SolutionBLLTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using Test.Extensions;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
 {
@@ -31,14 +30,32 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
     [TestClass]
     public class SolutionBLLTests
     {
+        Dictionary<string, string> input = new Dictionary<string, string>
+            {
+                { "a", "1" },
+                { "b", "2" }
+            };
+        List<SyntaxTree> inputList = new List<SyntaxTree>() { Mock.Of<SyntaxTree>(), Mock.Of<SyntaxTree>() };
+        SolutionBLL objectUnderTest;
+        Mock<ICustomSyntaxFactory> mock = new Mock<ICustomSyntaxFactory>();
+
+
+        private void Setup()
+        {
+            mock.Reset();
+            mock.Setup(x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(It.IsAny<SourceText>());
+            mock.Setup(x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>())).Returns(It.IsAny<SyntaxTree>());
+            objectUnderTest = new SolutionBLL(mock.Object);
+        }
+
         [TestMethod]
         public void GetSyntaxTrees_EmptyDictionary_ReturnsEmptyCollection()
         {
-            ICustomSyntaxFactory customSyntaxFactory = Mock.Of<ICustomSyntaxFactory>();
-            SolutionBLL testedObject = new SolutionBLL(customSyntaxFactory);
+            Setup();
+
             Dictionary<string, string> input = new Dictionary<string, string>();
 
-            var result = testedObject.GetSyntaxTrees(input);
+            var result = objectUnderTest.GetSyntaxTrees(input);
 
             Assert.IsFalse(result.Any());
         }
@@ -46,21 +63,9 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetSyntaxTrees_NotEmptyDictionary_ReturnsNotEmptyCollection()
         {
-            var mockedSourceText = new Mock<SourceText>(It.IsAny<ImmutableArray<byte>>(), It.IsAny<SourceHashAlgorithm>(), It.IsAny<SourceTextContainer>());
+            Setup();
 
-            ICustomSyntaxFactory customSyntaxFactory = Mock.Of<ICustomSyntaxFactory>(
-              x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>()) == It.IsAny<SourceText>() &&
-              x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>()) == It.IsAny<SyntaxTree>());
-
-
-            SolutionBLL testedObject = new SolutionBLL(customSyntaxFactory);
-            Dictionary<string, string> input = new Dictionary<string, string>
-            {
-                { "a", "1" },
-                { "b", "2" }
-            };
-
-            var result = testedObject.GetSyntaxTrees(input);
+            var result = objectUnderTest.GetSyntaxTrees(input);
 
             Assert.AreEqual(2, result.Count());
         }
@@ -68,13 +73,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetSyntaxTrees_CertainInput_ReturnsCertainSyntaxTree()
         {
-            var mock = new Mock<ICustomSyntaxFactory>();
-            
-            Dictionary<string, string> input = new Dictionary<string, string>
-            {
-                { "a", "1" },
-                { "b", "2" }
-            };
+            Setup();
 
             CustomSourceText textA = new CustomSourceText();
             CustomSourceText textB = new CustomSourceText();
@@ -82,15 +81,14 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
             SyntaxTree syntaxTreeB = Mock.Of<SyntaxTree>();
 
 
-            mock.Setup<SourceText>(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
-            mock.Setup<SourceText>(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
+            mock.Reset();
+            mock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
+            mock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
             mock.Setup(x => x.ParseSyntaxTree(textA, It.IsAny<ParseOptions>(), "a", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeA);
             mock.Setup(x => x.ParseSyntaxTree(textB, It.IsAny<ParseOptions>(), "b", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeB);
 
 
-            SolutionBLL testedObject = new SolutionBLL(mock.Object);
-
-            var result = testedObject.GetSyntaxTrees(input);
+            var result = objectUnderTest.GetSyntaxTrees(input);
 
             Assert.IsTrue(result.Contains(syntaxTreeA));
             Assert.IsTrue(result.Contains(syntaxTreeB));
@@ -101,13 +99,39 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetCompilation_InputEmptyCollection_ReturnsNull()
         {
-            var objectOnTest = new SolutionBLL(Mock.Of<ICustomSyntaxFactory>());
+            Setup();
+
             List<SyntaxTree> inputList = new List<SyntaxTree>();
 
-            var result = objectOnTest.GetCompilation(inputList, "");
+            var result = objectUnderTest.GetCompilation(inputList, "");
 
             Assert.IsNull(result);
         }
 
+        [TestMethod]
+        public void GetCompilation_InputCertainCollectionTestAssemblyName_ReturnsTestAssemblyCompilation()
+        {
+            Setup();
+            mock.Reset();
+
+            var result = objectUnderTest.GetCompilation(inputList, "TestAssembly");
+
+            mock.Verify(csf =>
+            csf.Create("TestAssembly", inputList, It.IsAny<IEnumerable<MetadataReference>>(), It.IsAny<CSharpCompilationOptions>()));
+        }
+
+
+        [TestMethod]
+        public void GetCompilation_InputCertainCollectionWithNullAssemblyName_ReturnsDefaultProjectCompilation()
+        {
+            Setup();
+            mock.Reset();
+            string defaultName = objectUnderTest.ProjectName;
+
+            var result = objectUnderTest.GetCompilation(inputList, null);
+
+            mock.Verify(csf =>
+            csf.Create(defaultName, It.IsAny<IEnumerable<SyntaxTree>>(), It.IsAny<IEnumerable<MetadataReference>>(), It.IsAny<CSharpCompilationOptions>()));
+        }
     }
 }
