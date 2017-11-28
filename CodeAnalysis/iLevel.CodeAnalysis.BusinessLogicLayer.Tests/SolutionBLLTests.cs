@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections;
-using System.Collections.Immutable;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
@@ -40,19 +39,24 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         Mock<ICustomSyntaxFactory> mock = new Mock<ICustomSyntaxFactory>();
 
 
-        private void Setup()
+        [TestInitialize]
+        public void Setup()
         {
-            mock.Reset();
             mock.Setup(x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(It.IsAny<SourceText>());
             mock.Setup(x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>())).Returns(It.IsAny<SyntaxTree>());
             objectUnderTest = new SolutionBLL(mock.Object);
         }
 
+        [TestCleanup]
+        public void Cleanup()
+        {
+            mock.Reset();
+        }
+
+
         [TestMethod]
         public void GetSyntaxTrees_EmptyDictionary_ReturnsEmptyCollection()
         {
-            Setup();
-
             Dictionary<string, string> input = new Dictionary<string, string>();
 
             var result = objectUnderTest.GetSyntaxTrees(input);
@@ -63,8 +67,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetSyntaxTrees_NotEmptyDictionary_ReturnsNotEmptyCollection()
         {
-            Setup();
-
             var result = objectUnderTest.GetSyntaxTrees(input);
 
             Assert.AreEqual(2, result.Count());
@@ -73,20 +75,15 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetSyntaxTrees_CertainInput_ReturnsCertainSyntaxTree()
         {
-            Setup();
-
             CustomSourceText textA = new CustomSourceText();
             CustomSourceText textB = new CustomSourceText();
             SyntaxTree syntaxTreeA = Mock.Of<SyntaxTree>();
             SyntaxTree syntaxTreeB = Mock.Of<SyntaxTree>();
-
-
-            mock.Reset();
+            
             mock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
             mock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
             mock.Setup(x => x.ParseSyntaxTree(textA, It.IsAny<ParseOptions>(), "a", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeA);
             mock.Setup(x => x.ParseSyntaxTree(textB, It.IsAny<ParseOptions>(), "b", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeB);
-
 
             var result = objectUnderTest.GetSyntaxTrees(input);
 
@@ -99,8 +96,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetCompilation_InputEmptyCollection_ReturnsNull()
         {
-            Setup();
-
             List<SyntaxTree> inputList = new List<SyntaxTree>();
 
             var result = objectUnderTest.GetCompilation(inputList, "");
@@ -111,9 +106,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetCompilation_InputCertainCollectionTestAssemblyName_ReturnsTestAssemblyCompilation()
         {
-            Setup();
-            mock.Reset();
-
             var result = objectUnderTest.GetCompilation(inputList, "TestAssembly");
 
             mock.Verify(csf =>
@@ -124,8 +116,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetCompilation_InputCertainCollectionWithNullAssemblyName_ReturnsDefaultProjectCompilation()
         {
-            Setup();
-            mock.Reset();
             string defaultName = objectUnderTest.ProjectName;
 
             var result = objectUnderTest.GetCompilation(inputList, null);
