@@ -75,6 +75,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetSyntaxTrees_CertainInput_ReturnsCertainSyntaxTree()
         {
+            mock.Reset();
             CustomSourceText textA = new CustomSourceText();
             CustomSourceText textB = new CustomSourceText();
             SyntaxTree syntaxTreeA = Mock.Of<SyntaxTree>();
