@@ -25,7 +25,7 @@ namespace CodeAnalysis.BusinessLogicLayer
             return FormatDiagnostics(SortDiagnostics(diagnostics, DiagnosticSeverity.Error));
         }
 
-        private Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics, DiagnosticSeverity severetyType)
+        internal Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics, DiagnosticSeverity severetyType)
         {
             return diagnostics.Where(d => d.Severity.Equals(severetyType)).
                 OrderBy(d => d.Location.SourceSpan.Start).ToArray();
@@ -33,16 +33,14 @@ namespace CodeAnalysis.BusinessLogicLayer
 
         public IEnumerable<string> FormatDiagnostics(params Diagnostic[] diagnostics)
         {
-            var builder = new StringBuilder();
+            string diagnosticString = null;
+            
             List<string> sortedDiagnostic = new List<string>();
 
             foreach (var diagnostic in diagnostics)
             {
-                builder.AppendLine("// " + diagnostic.ToString());
-
-                var location = diagnostic.Location;
-                sortedDiagnostic.Add(builder.ToString());
-                builder.Clear();
+                diagnosticString = "// " + diagnostic.ToString() + Environment.NewLine;
+                sortedDiagnostic.Add(diagnosticString);
             }
             
             return sortedDiagnostic;

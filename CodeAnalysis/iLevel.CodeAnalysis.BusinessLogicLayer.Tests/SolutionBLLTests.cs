@@ -87,9 +87,9 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
 
             var result = objectUnderTest.GetSyntaxTrees(input);
 
+            mock.Verify();
             Assert.IsTrue(result.Contains(syntaxTreeA));
             Assert.IsTrue(result.Contains(syntaxTreeB));
-            mock.Verify();
         }
 
 
