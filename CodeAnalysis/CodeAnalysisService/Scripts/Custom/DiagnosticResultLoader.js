@@ -6,7 +6,7 @@
         $("#submit").on("click", postSources);
     });
 
-    
+
     function postSources(e) {
         e.preventDefault();
         var files = document.getElementById('uploadFiles').files;
@@ -25,19 +25,22 @@
                     data: data,
 
                     statusCode: {
-                        201: function (message) {
-                            alert("Analyzed succesfully");
-                        },
-                        400: function () {
-                            alert("Bad Request. Operation not executed");
+                        400: function (message) {
+                            alert(message);
                         }
                     },
                     success: function (data, textStatus, xhr) {
                         var result = $("#names");
                         result.empty();
-                        for (var i = 0; i < data.length; i++) {
-                            result.append("<ol>" + data[i] + "</ol>");
+                        if (typeof data == 'string') {
+                            result.append("<ol>" + data + "</ol>");
                         }
+                        else {
+                            for (var i = 0; i < data.length; i++) {
+                                result.append("<ol>" + data[i] + "</ol>");
+                            }
+                        }
+
                     },
                     error: function (xhr, status, p3) {
                         alert(p3);

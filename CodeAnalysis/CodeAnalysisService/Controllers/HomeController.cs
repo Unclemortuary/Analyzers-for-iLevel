@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using CodeAnalysisService.Models;
 using CodeAnalysis.BusinessLogicLayer;
+using System.Net;
 using System.Net.Http;
 using System.IO;
 
@@ -16,6 +17,7 @@ namespace CodeAnalysisService.Controllers
         private readonly ISolutionCreator _solutionCreator;
 
         private readonly string DefaultCsHarpExtension = ".cs";
+        private readonly string DefaultAssemblyName = "ilevel";
 
 
         public HomeController(IDiagnosticService diagnosticService, ISolutionCreator solutionCreator)
@@ -30,8 +32,11 @@ namespace CodeAnalysisService.Controllers
         }
 
         [HttpPost]
-        public JsonResult Upload()
+        public ActionResult Upload()
         {
+            if (Request.Files.Count == 0)
+                return new HttpStatusCodeResult(204, "No files was received");
+
             List<string> wrongFilesList = new List<string>();
             Dictionary<string, string> normalFilesList = new Dictionary<string, string>();
 
@@ -55,19 +60,39 @@ namespace CodeAnalysisService.Controllers
                 }
             }
 
-            if(wrongFilesList.Count != 0)
+            if (wrongFilesList.Count != 0)
             {
-                return Json(new string[] {"Some files hs not appropriate format"});
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Some files has not appropriate format");
             }
             else
             {
-                var compilation = _solutionCreator.GetCompilation(_solutionCreator.GetSyntaxTrees(normalFilesList), "ilvl");
-                var diagnostics = _diagnosticService.GetCompilationDiagnostic(compilation);
-                if (diagnostics.Count() == 0)
-                    return Json(new string[] { "Your solution is OK" });
-                else
-                    return Json(diagnostics);
+                try
+                {
+                    var returnableMessage = GetCompilationDiagnostic(normalFilesList);
+                    return returnableMessage;
+                }
+                catch(Exception e)
+                {
+                    if (e is NullReferenceException || e is ArgumentNullException)
+                        return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
+                    else
+                        throw;
+                }
             }
+        }
+
+        internal JsonResult GetCompilationDiagnostic(Dictionary<string, string> files)
+        {
+            if (files == null)
+                throw new ArgumentNullException();
+            var compilation = _solutionCreator.GetCompilation(_solutionCreator.GetSyntaxTrees(files), DefaultAssemblyName);
+            var diagnostics = _diagnosticService.GetCompilationDiagnostic(compilation);
+            if (diagnostics == null)
+                throw new NullReferenceException();
+            if (diagnostics.Count() == 0)
+                return Json("Your solution is OK");
+            else
+                return Json(diagnostics);
         }
     }
 }
