@@ -10,6 +10,7 @@ using CodeAnalysisService.Controllers;
 using CodeAnalysis.BusinessLogicLayer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.IO;
 
 namespace CodeAnalysisService.Tests
 {
@@ -22,6 +23,8 @@ namespace CodeAnalysisService.Tests
         Mock<HttpRequestBase> requestMock = new Mock<HttpRequestBase>();
         Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>();
 
+
+        
 
         HomeController controllerUnderTest;
 
@@ -40,7 +43,7 @@ namespace CodeAnalysisService.Tests
 
 
             //Setup HttpRequest mocks
-            filesMock.Setup(f => f.GetEnumerator()).Returns(new HttpFileCollection[] { }.GetEnumerator());
+            filesMock.Setup(f => f.GetEnumerator()).Returns(new HttpPostedFileBase[] { }.GetEnumerator());
             requestMock.Setup(r => r.Files).Returns(filesMock.Object);
             contextMock.Setup(c => c.Request).Returns(requestMock.Object);
 
@@ -113,13 +116,34 @@ new class A {
         }
 
         [TestMethod]
-        public void Upload_InputEmtyRequest_Returns204StatusCode()
+        public void Upload_InputEmptyRequest_Returns204StatusCode()
         {
             filesMock.Setup(f => f.Count).Returns(0);
 
             var result = controllerUnderTest.Upload() as HttpStatusCodeResult;
 
             Assert.AreEqual(204, result.StatusCode);
+        }
+
+        [TestMethod]
+        public void Upload_InputFileWithWrongExtension_Returns400StatusCode()
+        {
+            string filename = "TestFile";
+            
+            HttpPostedFileBase badFile = Mock.Of<HttpPostedFileBase>(
+                f => f.FileName == filename + ".jar" &&
+                f.ToString() == "bad" &&
+                f.InputStream == Mock.Of<Stream>());
+            
+            filesMock.Reset();
+            filesMock.Setup(f => f.GetEnumerator()).Returns(new HttpPostedFileBase[] { badFile }.GetEnumerator());
+            filesMock.Setup(f => f.Count).Returns(1);
+            filesMock.Setup(f => f["bad"]).Returns(badFile);
+            
+
+            var result = controllerUnderTest.Upload() as HttpStatusCodeResult;
+
+            Assert.AreEqual(400, result.StatusCode);
         }
     }
 }

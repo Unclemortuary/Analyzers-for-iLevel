@@ -35,49 +35,37 @@ namespace CodeAnalysisService.Controllers
         public ActionResult Upload()
         {
             if (Request.Files.Count == 0)
-                return new HttpStatusCodeResult(204, "No files was received");
+                return new HttpStatusCodeResult(HttpStatusCode.NoContent, "No files was received");
 
-            List<string> wrongFilesList = new List<string>();
-            Dictionary<string, string> normalFilesList = new Dictionary<string, string>();
+            Dictionary<string, string> normalFiles = new Dictionary<string, string>();
 
-            foreach (string file in Request.Files)
+            foreach (var file in Request.Files)
             {
-                var upload = Request.Files[file];
+                var upload = Request.Files[file.ToString()];
                 if (upload != null)
                 {
-                    if(Path.GetExtension(upload.FileName) != DefaultCsHarpExtension)
-                    {
-                        wrongFilesList.Add(upload.FileName);
-                        continue;
-                    }
-                    else
-                    {
-                        string fileName = Path.GetFileName(upload.FileName);
-                        StreamReader streamReader = new StreamReader(upload.InputStream);
-                        string text = streamReader.ReadToEnd();
-                        normalFilesList.Add(fileName, text);
-                    }
-                }
-            }
+                    if (Path.GetExtension(upload.FileName) != DefaultCsHarpExtension)
+                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Some files has not appropriate format");
 
-            if (wrongFilesList.Count != 0)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Some files has not appropriate format");
+                    string fileName = Path.GetFileName(upload.FileName);
+                    using (StreamReader streamReader = new StreamReader(upload.InputStream))
+                    {
+                        string text = streamReader.ReadToEnd();
+                        normalFiles.Add(fileName, text);
+                    }
+                }
             }
-            else
+            try
             {
-                try
-                {
-                    var returnableMessage = GetCompilationDiagnostic(normalFilesList);
-                    return returnableMessage;
-                }
-                catch(Exception e)
-                {
-                    if (e is NullReferenceException || e is ArgumentNullException)
-                        return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
-                    else
-                        throw;
-                }
+                var returnableMessage = GetCompilationDiagnostic(normalFiles);
+                return returnableMessage;
+            }
+            catch (Exception e)
+            {
+                if (e is NullReferenceException || e is ArgumentNullException)
+                    return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
+                else
+                    throw;
             }
         }
 
