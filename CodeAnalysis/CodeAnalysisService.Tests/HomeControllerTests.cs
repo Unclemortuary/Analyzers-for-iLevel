@@ -22,9 +22,9 @@ namespace CodeAnalysisService.Tests
         Mock<HttpFileCollectionBase> filesMock = new Mock<HttpFileCollectionBase>();
         Mock<HttpRequestBase> requestMock = new Mock<HttpRequestBase>();
         Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>();
-
-
-        
+        Mock<HttpPostedFileBase> normalFileMock = new Mock<HttpPostedFileBase>();
+        Mock<HttpPostedFileBase> wrongExtensionFileMock = new Mock<HttpPostedFileBase>();
+        MemoryStream testStream = new MemoryStream();
 
         HomeController controllerUnderTest;
 
@@ -43,7 +43,21 @@ namespace CodeAnalysisService.Tests
 
 
             //Setup HttpRequest mocks
-            filesMock.Setup(f => f.GetEnumerator()).Returns(new HttpPostedFileBase[] { }.GetEnumerator());
+            string fileName = "TestFile";
+
+            normalFileMock.Setup(f => f.FileName).Returns(fileName + ".cs");
+            normalFileMock.Setup(f => f.ToString()).Returns("file1");
+            normalFileMock.Setup(f => f.InputStream).Returns(testStream);
+
+            wrongExtensionFileMock.Setup(f => f.FileName).Returns(fileName + ".jar");
+            wrongExtensionFileMock.Setup(f => f.ToString()).Returns("file2");
+            wrongExtensionFileMock.Setup(f => f.InputStream).Returns(testStream);
+
+            filesMock.Setup(f => f.GetEnumerator()).Returns(new HttpPostedFileBase[] {normalFileMock.Object, wrongExtensionFileMock.Object }.GetEnumerator());
+            filesMock.Setup(f => f.Count).Returns(2);
+            filesMock.Setup(f => f["file1"]).Returns(normalFileMock.Object);
+            filesMock.Setup(f => f["file2"]).Returns(wrongExtensionFileMock.Object);
+
             requestMock.Setup(r => r.Files).Returns(filesMock.Object);
             contextMock.Setup(c => c.Request).Returns(requestMock.Object);
 
@@ -118,6 +132,7 @@ new class A {
         [TestMethod]
         public void Upload_InputEmptyRequest_Returns204StatusCode()
         {
+            filesMock.Reset();
             filesMock.Setup(f => f.Count).Returns(0);
 
             var result = controllerUnderTest.Upload() as HttpStatusCodeResult;
@@ -128,22 +143,44 @@ new class A {
         [TestMethod]
         public void Upload_InputFileWithWrongExtension_Returns400StatusCode()
         {
-            string filename = "TestFile";
-            
-            HttpPostedFileBase badFile = Mock.Of<HttpPostedFileBase>(
-                f => f.FileName == filename + ".jar" &&
-                f.ToString() == "bad" &&
-                f.InputStream == Mock.Of<Stream>());
-            
-            filesMock.Reset();
-            filesMock.Setup(f => f.GetEnumerator()).Returns(new HttpPostedFileBase[] { badFile }.GetEnumerator());
-            filesMock.Setup(f => f.Count).Returns(1);
-            filesMock.Setup(f => f["bad"]).Returns(badFile);
-            
-
             var result = controllerUnderTest.Upload() as HttpStatusCodeResult;
 
             Assert.AreEqual(400, result.StatusCode);
+        }
+
+        [TestMethod]
+        public void Upload_InputSources_ReturnsAnyJson()
+        {
+            wrongExtensionFileMock.Reset();
+
+            wrongExtensionFileMock.Setup(f => f.FileName).Returns("AnotherTestFile" + ".cs");
+            wrongExtensionFileMock.Setup(f => f.InputStream).Returns(new MemoryStream());
+            wrongExtensionFileMock.Setup(f => f.ToString()).Returns("file2");
+
+            var result = controllerUnderTest.Upload();
+
+            Assert.IsInstanceOfType(result, typeof(JsonResult));
+
+            wrongExtensionFileMock.Reset();
+        }
+
+        [TestMethod]
+        public void Upload_InputSourcesCausesNullReferenceException_Returns500()
+        {
+            diagnosticServiceMock.Reset();
+            diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(It.IsAny<CSharpCompilation>())).Returns<IEnumerable<string>>(null);
+
+            wrongExtensionFileMock.Reset();
+
+            wrongExtensionFileMock.Setup(f => f.FileName).Returns("AnotherTestFile" + ".cs");
+            wrongExtensionFileMock.Setup(f => f.InputStream).Returns(new MemoryStream());
+            wrongExtensionFileMock.Setup(f => f.ToString()).Returns("file2");
+
+            var result = controllerUnderTest.Upload() as HttpStatusCodeResult;
+
+            Assert.AreEqual(500, result.StatusCode);
+
+            wrongExtensionFileMock.Reset();
         }
     }
 }
