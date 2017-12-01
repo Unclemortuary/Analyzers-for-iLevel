@@ -11,7 +11,7 @@
     <title>Index</title>
     <style type="text/css">
         .wrapper {
-            max-width: 500px;
+            max-width: 600px;
             border: 1px solid green;
             margin: 0 auto;
         }
@@ -20,16 +20,38 @@
             text-align: center;
             padding: 50px 0;
         }
+
+        .userInput {
+            padding-top: 5px;
+            text-align: center;
+        }
+
+        .results {
+            text-align:center;
+            padding: 10px;
+        }
+
+        .textResult {
+            margin: 0 auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+            position: relative;
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
         <div class="formContainer">
-            <input type="file" accept=".cs" multiple name="upload" id="uploadFiles" formenctype="multipart/form-data" /><br />
-            <button id="submit">Submit and get resutlt</button>
+            <div class="userInput">
+                <input type="file" accept=".cs" multiple name="upload" id="uploadFiles" formenctype="multipart/form-data" /><br />
+            </div>
+            <div class="userInput">
+                <button id="submit">Submit and get diagnostic</button>
+            </div>
         </div>
-        <div>
-            <ul id="names"></ul>
+        <div class="wrapper">
+            <div class="results"></div>
         </div>
     </div>
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>

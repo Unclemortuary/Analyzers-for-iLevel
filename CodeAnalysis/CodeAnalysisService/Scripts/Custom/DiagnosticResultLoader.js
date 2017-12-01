@@ -1,7 +1,5 @@
 ﻿(function () {
 
-    var baseUri = "api/analyzer";
-
     $(document).ready(function () {
         $("#submit").on("click", postSources);
     });
@@ -19,7 +17,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "Home/Upload",
+                    url: '@Url.Action("Upload","Home")',
                     contentType: false,
                     processData: false,
                     data: data,
@@ -30,14 +28,14 @@
                         }
                     },
                     success: function (data, textStatus, xhr) {
-                        var result = $("#names");
+                        var result = $(".results");
                         result.empty();
                         if (typeof data == 'string') {
-                            result.append("<ol>" + data + "</ol>");
+                            result.append('<div class="textResult">' + data + '</div>');
                         }
                         else {
                             for (var i = 0; i < data.length; i++) {
-                                result.append("<ol>" + data[i] + "</ol>");
+                                result.append('<div class="textResult">' + data[i] + '</div>');
                             }
                         }
 

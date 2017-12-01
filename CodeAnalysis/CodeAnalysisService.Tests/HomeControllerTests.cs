@@ -182,5 +182,13 @@ new class A {
 
             wrongExtensionFileMock.Reset();
         }
+
+        [TestMethod]
+        public void Index_ReturnedIndexView()
+        {
+            var result = controllerUnderTest.Index() as ViewResult;
+
+            Assert.AreEqual("Index", result.ViewName);
+        }
     }
 }
