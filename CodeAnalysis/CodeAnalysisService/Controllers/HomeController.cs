@@ -28,7 +28,7 @@ namespace CodeAnalysisService.Controllers
 
         public ActionResult Index()
         {
-            return View();
+            return View("Index");
         }
 
         [HttpPost]
@@ -55,24 +55,14 @@ namespace CodeAnalysisService.Controllers
                     }
                 }
             }
-            try
-            {
-                var returnableMessage = GetCompilationDiagnostic(normalFiles);
-                return returnableMessage;
-            }
-            catch (Exception e)
-            {
-                if (e is NullReferenceException || e is ArgumentNullException)
-                    return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
-                else
-                    throw;
-            }
+            var returnableMessage = GetCompilationDiagnostic(normalFiles);
+            return returnableMessage;
         }
 
         internal JsonResult GetCompilationDiagnostic(Dictionary<string, string> files)
         {
             if (files == null)
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("files");
             var compilation = _solutionCreator.GetCompilation(_solutionCreator.GetSyntaxTrees(files), DefaultAssemblyName);
             var diagnostics = _diagnosticService.GetCompilationDiagnostic(compilation);
             if (diagnostics == null)

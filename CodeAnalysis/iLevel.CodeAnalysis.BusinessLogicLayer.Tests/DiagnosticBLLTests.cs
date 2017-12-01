@@ -15,11 +15,18 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         DiagnosticBLL objectUnderTest = new DiagnosticBLL();
         List<Mock<Diagnostic>> diagnosticMocks = new List<Mock<Diagnostic>>() { new Mock<Diagnostic>(), new Mock<Diagnostic>(), new Mock<Diagnostic>() };
 
+        [TestInitialize]
+        public void Setup()
+        {
+            objectUnderTest = new DiagnosticBLL();
+        }
+
         [TestCleanup]
         public void CleanUp()
         {
             foreach (var mock in diagnosticMocks)
                 mock.Reset();
+            objectUnderTest = null;
         }
 
         [TestMethod]

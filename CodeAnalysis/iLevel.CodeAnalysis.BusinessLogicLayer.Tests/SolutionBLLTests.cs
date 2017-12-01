@@ -1,14 +1,13 @@
-﻿using System;
+﻿using System.Linq;
+using System.Text;
+using System.Collections.Generic;
 using CodeAnalysis.BusinessLogicLayer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections;
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
-using System.Linq;
-using System.Text;
+using Moq;
+
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
 {
@@ -51,6 +50,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         public void Cleanup()
         {
             mock.Reset();
+            objectUnderTest = null;
         }
 
 

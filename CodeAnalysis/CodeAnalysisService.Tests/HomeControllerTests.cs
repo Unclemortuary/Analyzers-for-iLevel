@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Web;
 using System.Web.Mvc;
-using System.Net.Http;
-using System.Collections;
+using System.Web.Routing;
+using System.IO;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,7 +10,7 @@ using CodeAnalysisService.Controllers;
 using CodeAnalysis.BusinessLogicLayer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.IO;
+
 
 namespace CodeAnalysisService.Tests
 {
@@ -63,7 +63,7 @@ namespace CodeAnalysisService.Tests
 
             //Setup tested controller
             controllerUnderTest = new HomeController(diagnosticServiceMock.Object, solutionCreatorMock.Object);
-            controllerUnderTest.ControllerContext = new ControllerContext(contextMock.Object, new System.Web.Routing.RouteData(), controllerUnderTest);
+            controllerUnderTest.ControllerContext = new ControllerContext(contextMock.Object, new RouteData(), controllerUnderTest);
         }
 
         [TestCleanup]
@@ -74,6 +74,7 @@ namespace CodeAnalysisService.Tests
             filesMock.Reset();
             requestMock.Reset();
             contextMock.Reset();
+            controllerUnderTest = null;
         }
 
         [TestMethod]
@@ -124,7 +125,7 @@ new class A {
 
             var action = controllerUnderTest.GetCompilationDiagnostic(input);
 
-            var result = action.Data as List<string>;
+            var result = (List<string>) action.Data;
 
             Assert.IsTrue(result.Contains(diagnostic));
         }
@@ -135,7 +136,7 @@ new class A {
             filesMock.Reset();
             filesMock.Setup(f => f.Count).Returns(0);
 
-            var result = controllerUnderTest.Upload() as HttpStatusCodeResult;
+            var result = (HttpStatusCodeResult) controllerUnderTest.Upload();
 
             Assert.AreEqual(204, result.StatusCode);
         }
@@ -143,7 +144,7 @@ new class A {
         [TestMethod]
         public void Upload_InputFileWithWrongExtension_Returns400StatusCode()
         {
-            var result = controllerUnderTest.Upload() as HttpStatusCodeResult;
+            var result = (HttpStatusCodeResult) controllerUnderTest.Upload();
 
             Assert.AreEqual(400, result.StatusCode);
         }
@@ -165,7 +166,7 @@ new class A {
         }
 
         [TestMethod]
-        public void Upload_InputSourcesCausesNullReferenceException_Returns500()
+        public void Upload_InputSourcesCausesNullReferenceException_ThrowsNullReferenceExeption()
         {
             diagnosticServiceMock.Reset();
             diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(It.IsAny<CSharpCompilation>())).Returns<IEnumerable<string>>(null);
@@ -176,9 +177,9 @@ new class A {
             wrongExtensionFileMock.Setup(f => f.InputStream).Returns(new MemoryStream());
             wrongExtensionFileMock.Setup(f => f.ToString()).Returns("file2");
 
-            var result = controllerUnderTest.Upload() as HttpStatusCodeResult;
+            Action result = () => controllerUnderTest.Upload();
 
-            Assert.AreEqual(500, result.StatusCode);
+            Assert.ThrowsException<NullReferenceException>(result);
 
             wrongExtensionFileMock.Reset();
         }
@@ -186,7 +187,7 @@ new class A {
         [TestMethod]
         public void Index_ReturnedIndexView()
         {
-            var result = controllerUnderTest.Index() as ViewResult;
+            var result = (ViewResult) controllerUnderTest.Index();
 
             Assert.AreEqual("Index", result.ViewName);
         }
