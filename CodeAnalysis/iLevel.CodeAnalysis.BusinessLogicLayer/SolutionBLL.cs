@@ -15,32 +15,6 @@ namespace CodeAnalysis.BusinessLogicLayer
         CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName);
     }
 
-    public interface ICustomSyntaxFactory
-    {
-        SyntaxTree ParseSyntaxTree(SourceText text, ParseOptions options = null, string path = "", CancellationToken cancellationToken = default(CancellationToken));
-        SourceText GetSourceText(string text, Encoding encoding = null, SourceHashAlgorithm checksumAlgorithm = SourceHashAlgorithm.Sha1);
-        CSharpCompilation Create(string assemblyName, IEnumerable<SyntaxTree> syntaxTrees = null, IEnumerable<MetadataReference> references = null, CSharpCompilationOptions options = null);
-    }
-
-    internal class CustomSyntaxFactory : ICustomSyntaxFactory
-    {
-
-        public CSharpCompilation Create(string assemblyName, IEnumerable<SyntaxTree> syntaxTrees = null, IEnumerable<MetadataReference> references = null, CSharpCompilationOptions options = null)
-        {
-            return CSharpCompilation.Create(assemblyName, syntaxTrees, references, options);
-        }
-
-        public SourceText GetSourceText(string text, Encoding encoding = null, SourceHashAlgorithm checksumAlgorithm = SourceHashAlgorithm.Sha1)
-        {
-            return SourceText.From(text, encoding, checksumAlgorithm);
-        }
-
-        public SyntaxTree ParseSyntaxTree(SourceText text, ParseOptions options = null, string path = "", CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return SyntaxFactory.ParseSyntaxTree(text, options, path);
-        }
-    }
-
     public class SolutionBLL : ISolutionCreator
     {
         private readonly ICustomSyntaxFactory _customSyntaxFactory;

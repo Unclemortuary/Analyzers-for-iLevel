@@ -28,7 +28,7 @@ namespace CodeAnalysisService.Controllers
 
         public ActionResult Index()
         {
-            return View("Index");
+            return View(nameof(this.Index));
         }
 
         [HttpPost]
@@ -61,8 +61,7 @@ namespace CodeAnalysisService.Controllers
 
         internal JsonResult GetCompilationDiagnostic(Dictionary<string, string> files)
         {
-            if (files == null)
-                throw new ArgumentNullException("files");
+            files = files ?? throw new ArgumentNullException(nameof(files));
             var compilation = _solutionCreator.GetCompilation(_solutionCreator.GetSyntaxTrees(files), DefaultAssemblyName);
             var diagnostics = _diagnosticService.GetCompilationDiagnostic(compilation);
             if (diagnostics == null)

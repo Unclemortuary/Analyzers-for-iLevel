@@ -16,6 +16,7 @@ namespace CodeAnalysis.BusinessLogicLayer
 
         public IEnumerable<string> GetCompilationDiagnostic(CSharpCompilation compilation)
         {
+            compilation = compilation ?? throw new ArgumentNullException(nameof(compilation));
             var diagnostics = compilation.GetDiagnostics();
             return FormatDiagnostics(SortDiagnostics(diagnostics, DiagnosticSeverity.Error));
         }
