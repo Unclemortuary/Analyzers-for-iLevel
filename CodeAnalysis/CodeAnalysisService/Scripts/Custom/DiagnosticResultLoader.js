@@ -17,7 +17,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: '@Url.Action("Upload","Home")',
+                    url: 'home/upload',
                     contentType: false,
                     processData: false,
                     data: data,
@@ -45,8 +45,12 @@
                     }
                 });
             } else {
-                alert("Brouser does not support upploading HTML5 files");
+                alert("Browser does not support upploading HTML5 files");
             }
+        }
+        else
+        {
+            alert("Choose files first!");
         }
     }
 })();
