@@ -6,18 +6,22 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.CSharp;
+using System.Threading;
+using System.Collections.Immutable;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
 {
     [TestClass]
     public class DiagnosticBLLTests
     {
-        DiagnosticBLL objectUnderTest = new DiagnosticBLL();
-        List<Mock<Diagnostic>> diagnosticMocks = new List<Mock<Diagnostic>>() { new Mock<Diagnostic>(), new Mock<Diagnostic>(), new Mock<Diagnostic>() };
+        DiagnosticBLL objectUnderTest;
+        List<Mock<Diagnostic>> diagnosticMocks;
 
         [TestInitialize]
         public void Setup()
         {
+            diagnosticMocks = new List<Mock<Diagnostic>>() { new Mock<Diagnostic>(), new Mock<Diagnostic>(), new Mock<Diagnostic>() };
             objectUnderTest = new DiagnosticBLL();
         }
 
@@ -116,11 +120,21 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         }
 
         [TestMethod]
-        public void GetCompilationDiagnostic_InputNull_ThrowsNullReferenceException()
+        public void GetCompilationDiagnostic_InputNull_ThrowsArgNullException()
         {
             Action result = () => objectUnderTest.GetCompilationDiagnostic(null);
 
-            Assert.ThrowsException<NullReferenceException>(result);
+            Assert.ThrowsException<ArgumentNullException>(result);
+        }
+
+        [TestMethod]
+        public void GetCompilationDiagnostic_InputAnyCompilation_ReturnsAnyFormattedDiagnostic()
+        {
+            CSharpCompilation compilation = CSharpCompilation.Create("");
+
+            var result = objectUnderTest.GetCompilationDiagnostic(compilation);
+
+            Assert.IsTrue(result.Count() > 0);
         }
     }
 }
