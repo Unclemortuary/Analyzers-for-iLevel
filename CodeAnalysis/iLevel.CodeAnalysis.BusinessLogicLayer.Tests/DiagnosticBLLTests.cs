@@ -7,7 +7,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Threading;
 using System.Collections.Immutable;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
