@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using CodeAnalysis.BusinessLogicLayer;
 using System.Net;
 using System.IO;
+using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
 namespace CodeAnalysisService.Controllers
 {
@@ -64,7 +65,11 @@ namespace CodeAnalysisService.Controllers
             if (diagnostics == null)
                 throw new NullReferenceException();
             if (diagnostics.Count() == 0)
-                return Json("Your solution is OK");
+            {
+                var proj = _solutionCreator.GetProject(files, "SomeName");
+                var result = _diagnosticService.GetCompilationDiagnostic(proj, AnalyzerProvider.Analyzers.ToImmutableArray());
+                return Json(result);
+            }
             else
                 return Json(diagnostics);
         }

@@ -4,16 +4,10 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
+using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
-namespace CodeAnalysis.BusinessLogicLayer
+namespace iLevel.CodeAnalysis.BusinessLogicLayer.CustomFactories
 {
-    public interface ICustomSyntaxFactory
-    {
-        SyntaxTree ParseSyntaxTree(SourceText text, ParseOptions options = null, string path = "", CancellationToken cancellationToken = default(CancellationToken));
-        SourceText GetSourceText(string text, Encoding encoding = null, SourceHashAlgorithm checksumAlgorithm = SourceHashAlgorithm.Sha1);
-        CSharpCompilation Create(string assemblyName, IEnumerable<SyntaxTree> syntaxTrees = null, IEnumerable<MetadataReference> references = null, CSharpCompilationOptions options = null);
-    }
-
     internal class CustomSyntaxFactory : ICustomSyntaxFactory
     {
         public CSharpCompilation Create(string assemblyName, IEnumerable<SyntaxTree> syntaxTrees = null, IEnumerable<MetadataReference> references = null, CSharpCompilationOptions options = null)

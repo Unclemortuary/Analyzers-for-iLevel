@@ -1,16 +1,14 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
-namespace CodeAnalysis.BusinessLogicLayer
+namespace iLevel.CodeAnalysis.BusinessLogicLayer
 {
-    public interface IDiagnosticService
-    {
-        IEnumerable<string> GetCompilationDiagnostic(CSharpCompilation compilation);
-    }
-
     public class DiagnosticBLL : IDiagnosticService
     {
 
@@ -19,6 +17,13 @@ namespace CodeAnalysis.BusinessLogicLayer
             compilation = compilation ?? throw new ArgumentNullException(nameof(compilation));
             var diagnostics = compilation.GetDiagnostics();
             return FormatDiagnostics(SortDiagnostics(diagnostics, DiagnosticSeverity.Error));
+        }
+
+        public IEnumerable<string> GetCompilationDiagnostic(Project proj, ImmutableArray<DiagnosticAnalyzer> analyzers)
+        {
+            var compilation = proj.GetCompilationAsync().Result.WithAnalyzers(analyzers);
+            var diagnostics = compilation.GetAllDiagnosticsAsync().Result;
+            return FormatDiagnostics(SortDiagnostics(diagnostics, DiagnosticSeverity.Warning));
         }
 
         internal Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics, DiagnosticSeverity severetyType)

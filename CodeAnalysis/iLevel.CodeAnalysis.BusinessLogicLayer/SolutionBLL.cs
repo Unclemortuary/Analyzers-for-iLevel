@@ -1,33 +1,26 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
+using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
-
-namespace CodeAnalysis.BusinessLogicLayer
+namespace iLevel.CodeAnalysis.BusinessLogicLayer
 {
-    public interface ISolutionCreator
-    {
-        IEnumerable<SyntaxTree> GetSyntaxTrees(Dictionary<string, string> sources);
-        CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName);
-    }
-
     public class SolutionBLL : ISolutionCreator
     {
         private readonly ICustomSyntaxFactory _customSyntaxFactory;
+        private readonly ICustomSolutionFactory _customSolutionFactory;
 
         private readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         private readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
         private readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         private readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
 
-        public SolutionBLL(ICustomSyntaxFactory factory)
+        public SolutionBLL(ICustomSyntaxFactory factory, ICustomSolutionFactory customSolutionFactory)
         {
             if (factory != null)
                 _customSyntaxFactory = factory;
+            _customSolutionFactory = customSolutionFactory;
         }
 
         private string _defaultFilePrefix = "Service";
@@ -50,6 +43,24 @@ namespace CodeAnalysis.BusinessLogicLayer
             }
 
             return list;
+        }
+
+        public Project GetProject(Dictionary<string, string> sources, string projectName)
+        {
+            ProjectId id = ProjectId.CreateNewId(projectName);
+
+            CustomSolution solution = _customSolutionFactory
+                .CreateWithProject(id,
+                projectName,
+                _defaultProjectName,
+                new MetadataReference[] { CorlibReference, SystemCoreReference, CSharpSymbolsReference, CodeAnalysisReference });
+                
+            foreach (var source in sources)
+            {
+                solution = _customSolutionFactory.AddDocument(DocumentId.CreateNewId(id, source.Key), source.Key, _customSyntaxFactory.GetSourceText(source.Value), solution);
+            }
+
+            return solution.Projects.First();
         }
 
         public CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName)
