@@ -1,12 +1,13 @@
-﻿using CodeAnalysis.BusinessLogicLayer;
-using Moq;
+﻿using Moq;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
@@ -134,6 +135,27 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
             var result = objectUnderTest.GetCompilationDiagnostic(compilation);
 
             Assert.IsTrue(result.Count() > 0);
+        }
+
+        [TestMethod]
+        public void GetCompilationDiagnostic_InputEmptyAnalyzersCollection_ThrowsArgumentException()
+        {
+            var project = new AdhocWorkspace().CurrentSolution.AddProject("", "", LanguageNames.CSharp);
+
+            Action result = () => objectUnderTest.GetCompilationDiagnostic(project, new DiagnosticAnalyzer[] { }.ToImmutableArray());
+
+            Assert.ThrowsException<ArgumentException>(result);
+        }
+
+        [TestMethod]
+        public void GetCompilationDiagnostic_InputAnyAnalyzersCollection_ReturnsAnyStringCollection()
+        {
+            var project = new AdhocWorkspace().CurrentSolution.AddProject("", "", LanguageNames.CSharp);
+
+            var result = objectUnderTest.GetCompilationDiagnostic(project, new DiagnosticAnalyzer[] { Mock.Of<DiagnosticAnalyzer>() }.ToImmutableArray());
+
+            Assert.IsNotNull(result);
+            Assert.IsInstanceOfType(result, typeof(IEnumerable<string>));
         }
     }
 }

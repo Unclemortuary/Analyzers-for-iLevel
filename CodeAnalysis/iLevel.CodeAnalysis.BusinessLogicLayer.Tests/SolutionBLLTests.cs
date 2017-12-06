@@ -1,13 +1,12 @@
 ﻿using System.Linq;
 using System.Text;
 using System.Collections.Generic;
-using CodeAnalysis.BusinessLogicLayer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
 using Moq;
-
+using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
 {
@@ -22,7 +21,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         public override int Length => default(int);
 
         public override void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
-
     }
 
     [TestClass]
@@ -36,14 +34,14 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         List<SyntaxTree> inputList = new List<SyntaxTree>() { Mock.Of<SyntaxTree>(), Mock.Of<SyntaxTree>() };
         SolutionBLL objectUnderTest;
         Mock<ICustomSyntaxFactory> mock = new Mock<ICustomSyntaxFactory>();
-
+        Mock<ICustomSolutionFactory> solutionFactoryMock = new Mock<ICustomSolutionFactory>();
 
         [TestInitialize]
         public void Setup()
         {
             mock.Setup(x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(It.IsAny<SourceText>());
             mock.Setup(x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>())).Returns(It.IsAny<SyntaxTree>());
-            objectUnderTest = new SolutionBLL(mock.Object);
+            objectUnderTest = new SolutionBLL(mock.Object, solutionFactoryMock.Object);
         }
 
         [TestCleanup]

@@ -7,10 +7,9 @@ using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using CodeAnalysisService.Controllers;
-using CodeAnalysis.BusinessLogicLayer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-
+using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
 namespace CodeAnalysisService.Tests
 {
