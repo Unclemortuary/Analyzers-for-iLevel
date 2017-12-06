@@ -8,6 +8,9 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
 {
     public class SolutionBLL : ISolutionCreator
     {
+        private string _defaultProjectName = "iLevelProject";
+        private string _defaultAssemblyName = "iLevelAssembly";
+
         private readonly ICustomSyntaxFactory _customSyntaxFactory;
         private readonly ICustomSolutionFactory _customSolutionFactory;
 
@@ -16,21 +19,15 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
         private readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         private readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
 
+        public string ProjectName { get { return _defaultProjectName; } }
+        public string AssemblyName { get { return _defaultAssemblyName; } }
+
         public SolutionBLL(ICustomSyntaxFactory factory, ICustomSolutionFactory customSolutionFactory)
         {
             if (factory != null)
                 _customSyntaxFactory = factory;
             _customSolutionFactory = customSolutionFactory;
         }
-
-        private string _defaultFilePrefix = "Service";
-        private string _cSharpDefaultFileExt = "cs";
-        private string _defaultProjectName = "DefaultProject";
-
-        public string FilePrefix { get { return _defaultFilePrefix; } set { _defaultFilePrefix = value; } }
-        public string FileExt { get { return _cSharpDefaultFileExt; } set { _cSharpDefaultFileExt = value; } }
-        public string ProjectName { get { return _defaultProjectName; } set { _defaultProjectName = value; } }
-
 
         public IEnumerable<SyntaxTree> GetSyntaxTrees(Dictionary<string, string> sources)
         {
@@ -45,14 +42,15 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
             return list;
         }
 
-        public Project GetProject(Dictionary<string, string> sources, string projectName)
+        public Project GetProject(Dictionary<string, string> sources, string projectName = null)
         {
+            projectName = projectName ?? _defaultProjectName;
             ProjectId id = ProjectId.CreateNewId(projectName);
 
             CustomSolution solution = _customSolutionFactory
                 .CreateWithProject(id,
                 projectName,
-                _defaultProjectName,
+                _defaultAssemblyName,
                 new MetadataReference[] { CorlibReference, SystemCoreReference, CSharpSymbolsReference, CodeAnalysisReference });
                 
             foreach (var source in sources)
@@ -65,7 +63,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
 
         public CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName)
         {
-            string assembly = assemblyName ?? _defaultProjectName;
+            string assembly = assemblyName ?? _defaultAssemblyName;
             if (syntaxTrees.Count() == 0)
                 return null;
 

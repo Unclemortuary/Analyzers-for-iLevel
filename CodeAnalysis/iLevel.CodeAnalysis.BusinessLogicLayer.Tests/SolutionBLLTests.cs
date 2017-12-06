@@ -41,6 +41,8 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         {
             mock.Setup(x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(It.IsAny<SourceText>());
             mock.Setup(x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>())).Returns(It.IsAny<SyntaxTree>());
+
+            //solutionFactoryMock.Setup(x => x.CreateWithProject())
             objectUnderTest = new SolutionBLL(mock.Object, solutionFactoryMock.Object);
         }
 
@@ -115,12 +117,25 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetCompilation_InputCertainCollectionWithNullAssemblyName_ReturnsDefaultProjectCompilation()
         {
-            string defaultName = objectUnderTest.ProjectName;
+            string defaultName = objectUnderTest.AssemblyName;
 
             var result = objectUnderTest.GetCompilation(inputList, null);
 
             mock.Verify(csf =>
             csf.Create(defaultName, It.IsAny<IEnumerable<SyntaxTree>>(), It.IsAny<IEnumerable<MetadataReference>>(), It.IsAny<CSharpCompilationOptions>()));
+        }
+
+        [TestMethod]
+        public void GetProject_InputNullProjectNameAndEmptyCollection_ReturnsProjectWithoutDocuments()
+        {
+            var solutionWithEmptyProject = new CustomSolution(new AdhocWorkspace().CurrentSolution.AddProject(ProjectId.CreateNewId(""), "", "", LanguageNames.CSharp));
+
+            solutionFactoryMock.Setup(
+               x => x.CreateWithProject(It.IsAny<ProjectId>(), objectUnderTest.ProjectName, objectUnderTest.AssemblyName, It.IsAny<IEnumerable<MetadataReference>>())).Returns(solutionWithEmptyProject);
+            
+            var result = objectUnderTest.GetProject(new Dictionary<string, string>(), null);
+
+            Assert.IsFalse(result.Documents.Any());
         }
     }
 }
