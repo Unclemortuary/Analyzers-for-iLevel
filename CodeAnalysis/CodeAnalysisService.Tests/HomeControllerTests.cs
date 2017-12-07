@@ -35,7 +35,6 @@ namespace CodeAnalysisService.Tests
         public void Setup()
         {
             //Setup input and output data
-  
             string text = @"
 new class A {
     int a;
@@ -52,7 +51,6 @@ new class A {
 
             solutionCreatorMock.Setup(
                 sc => sc.GetSyntaxTrees(It.IsAny<Dictionary<string, string>>())).Returns(new List<SyntaxTree>());
-
 
             //Setup HttpRequest mocks
             string fileName = "TestFile";
@@ -119,12 +117,6 @@ new class A {
         [TestMethod]
         public void GetCompilationDiagnostic_InputCertainDictionary_ReturnsDiagnostic()
         {
-            //string name = "a";
-            //string sourceCode = @"
-//new class A {
-//    int a;
-//}";
-            //Dictionary<string, string> input = new Dictionary<string, string>() { [name] = sourceCode };
             SyntaxTree syntaxTree = Mock.Of<SyntaxTree>();
             CSharpCompilation compilation = default(CSharpCompilation);
             solutionCreatorMock.Reset();
@@ -141,12 +133,6 @@ new class A {
         [TestMethod]
         public void GetCompilationDiagnostic_InputNormalFiles_ReturnsJSONWithStringMessage()
         {
-    //        string text = @"
-    //class Program
-    //{
-    //    static void Main(string[] args) { }
-    //}";
-            //Dictionary<string, string> input = new Dictionary<string, string>() { ["first"] = text };
             Project project = new AdhocWorkspace().CurrentSolution.AddProject("TestName", "Name", LanguageNames.CSharp);
 
             solutionCreatorMock.Setup(
@@ -163,15 +149,8 @@ new class A {
         [TestMethod]
         public void GetCompilationDiagnostic_InputFilesWithWarnings_ReturnsListOfAnalyzersDiagnostic()
         {
-    //        string text = @"
-    //class Program
-    //{
-    //    static void Main(string[] args__) { }
-    //}";
-    //        Dictionary<string, string> input = new Dictionary<string, string>() { ["first"] = text };
+    
             Project project = new AdhocWorkspace().CurrentSolution.AddProject("TestName", "Name", LanguageNames.CSharp);
-
-            //string diagnosticReport = "some message";
 
             solutionCreatorMock.Setup(
                 x => x.GetProject(input, It.IsAny<string>())).Returns(project);
