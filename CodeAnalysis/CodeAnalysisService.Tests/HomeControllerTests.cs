@@ -10,6 +10,8 @@ using CodeAnalysisService.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace CodeAnalysisService.Tests
 {
@@ -24,12 +26,23 @@ namespace CodeAnalysisService.Tests
         Mock<HttpPostedFileBase> normalFileMock = new Mock<HttpPostedFileBase>();
         Mock<HttpPostedFileBase> wrongExtensionFileMock = new Mock<HttpPostedFileBase>();
         MemoryStream testStream = new MemoryStream();
+        Dictionary<string, string> input;
+        string diagnosticReport;
 
         HomeController controllerUnderTest;
 
         [TestInitialize]
         public void Setup()
         {
+            //Setup input and output data
+  
+            string text = @"
+new class A {
+    int a;
+}";
+            input = new Dictionary<string, string>() { ["first"] = text };
+            diagnosticReport = "Some message";
+
             //Setup dependencies mocks default behaviour
             diagnosticServiceMock.Setup(
                 ds => ds.GetCompilationDiagnostic(It.IsAny<CSharpCompilation>())).Returns(new List<string>());
@@ -106,28 +119,70 @@ namespace CodeAnalysisService.Tests
         [TestMethod]
         public void GetCompilationDiagnostic_InputCertainDictionary_ReturnsDiagnostic()
         {
-            string name = "a";
-            string sourceCode = @"
-new class A {
-    int a;
-}";
-            Dictionary<string, string> input = new Dictionary<string, string>() { [name] = sourceCode };
+            //string name = "a";
+            //string sourceCode = @"
+//new class A {
+//    int a;
+//}";
+            //Dictionary<string, string> input = new Dictionary<string, string>() { [name] = sourceCode };
             SyntaxTree syntaxTree = Mock.Of<SyntaxTree>();
             CSharpCompilation compilation = default(CSharpCompilation);
-            string diagnostic = "";
             solutionCreatorMock.Reset();
             diagnosticServiceMock.Reset();
             solutionCreatorMock.Setup(sc => sc.GetSyntaxTrees(input)).Returns(new List<SyntaxTree>() { syntaxTree });
             solutionCreatorMock.Setup(sc => sc.GetCompilation(new List<SyntaxTree>() { syntaxTree }, It.IsAny<string>())).Returns(compilation);
-            diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(compilation)).Returns(new List<string>() { diagnostic });
-            
+            diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(compilation)).Returns(new List<string>() { diagnosticReport });
 
             var result = (List<string>) controllerUnderTest.GetCompilationDiagnostic(input).Data;
 
-            Assert.IsTrue(result.Contains(diagnostic));
+            Assert.IsTrue(result.Contains(diagnosticReport));
         }
 
-        
+        [TestMethod]
+        public void GetCompilationDiagnostic_InputNormalFiles_ReturnsJSONWithStringMessage()
+        {
+    //        string text = @"
+    //class Program
+    //{
+    //    static void Main(string[] args) { }
+    //}";
+            //Dictionary<string, string> input = new Dictionary<string, string>() { ["first"] = text };
+            Project project = new AdhocWorkspace().CurrentSolution.AddProject("TestName", "Name", LanguageNames.CSharp);
+
+            solutionCreatorMock.Setup(
+                x => x.GetProject(input, It.IsAny<string>())).Returns(project);
+            diagnosticServiceMock.Setup(
+                x => x.GetCompilationDiagnostic(project, It.IsAny<ImmutableArray<DiagnosticAnalyzer>>()))
+                .Returns(new List<string>());
+
+            var result = (string) controllerUnderTest.GetCompilationDiagnostic(input).Data;
+
+            Assert.AreEqual(result, controllerUnderTest.OkMessage);
+        }
+
+        [TestMethod]
+        public void GetCompilationDiagnostic_InputFilesWithWarnings_ReturnsListOfAnalyzersDiagnostic()
+        {
+    //        string text = @"
+    //class Program
+    //{
+    //    static void Main(string[] args__) { }
+    //}";
+    //        Dictionary<string, string> input = new Dictionary<string, string>() { ["first"] = text };
+            Project project = new AdhocWorkspace().CurrentSolution.AddProject("TestName", "Name", LanguageNames.CSharp);
+
+            //string diagnosticReport = "some message";
+
+            solutionCreatorMock.Setup(
+                x => x.GetProject(input, It.IsAny<string>())).Returns(project);
+            diagnosticServiceMock.Setup(
+                x => x.GetCompilationDiagnostic(project, It.IsAny<ImmutableArray<DiagnosticAnalyzer>>()))
+                .Returns(new List<string>() { diagnosticReport });
+
+            var result = (List<string>) controllerUnderTest.GetCompilationDiagnostic(input).Data;
+
+            Assert.IsTrue(result.Contains(diagnosticReport));
+        }
 
         [TestMethod]
         public void Upload_InputEmptyRequest_Returns204StatusCode()
