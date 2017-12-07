@@ -122,12 +122,12 @@ new class A {
             diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(compilation)).Returns(new List<string>() { diagnostic });
             
 
-            var action = controllerUnderTest.GetCompilationDiagnostic(input);
-
-            var result = (List<string>) action.Data;
+            var result = (List<string>) controllerUnderTest.GetCompilationDiagnostic(input).Data;
 
             Assert.IsTrue(result.Contains(diagnostic));
         }
+
+        
 
         [TestMethod]
         public void Upload_InputEmptyRequest_Returns204StatusCode()

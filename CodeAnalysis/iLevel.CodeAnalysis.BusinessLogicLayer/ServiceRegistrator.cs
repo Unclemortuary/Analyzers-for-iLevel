@@ -12,7 +12,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
             container.RegisterType<IDiagnosticService, DiagnosticBLL>();
             container.RegisterType<ISolutionCreator, SolutionBLL>();
             container.RegisterType<ICustomSyntaxFactory, CustomSyntaxFactory>();
-            container.RegisterType<ICustomSolutionFactory, CustomSolutionFactory>();
         }
     }
 }

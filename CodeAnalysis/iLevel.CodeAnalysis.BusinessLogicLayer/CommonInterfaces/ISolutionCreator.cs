@@ -8,6 +8,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces
     {
         IEnumerable<SyntaxTree> GetSyntaxTrees(Dictionary<string, string> sources);
         CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName);
-        Project GetProject(Dictionary<string, string> sources, string projectName);
+        Project GetProject(Dictionary<string, string> sources, string projectName = null);
     }
 }

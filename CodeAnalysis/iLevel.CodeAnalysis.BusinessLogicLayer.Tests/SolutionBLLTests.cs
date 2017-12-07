@@ -7,13 +7,15 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
 using Moq;
 using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
+using System.Linq.Expressions;
+using System;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
 {
     public class CustomSourceText : SourceText
     {
         public CustomSourceText() { }
-        
+
         public override char this[int position] => default(char);
 
         public override Encoding Encoding => default(Encoding);
@@ -34,16 +36,18 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         List<SyntaxTree> inputList = new List<SyntaxTree>() { Mock.Of<SyntaxTree>(), Mock.Of<SyntaxTree>() };
         SolutionBLL objectUnderTest;
         Mock<ICustomSyntaxFactory> mock = new Mock<ICustomSyntaxFactory>();
-        Mock<ICustomSolutionFactory> solutionFactoryMock = new Mock<ICustomSolutionFactory>();
 
         [TestInitialize]
         public void Setup()
         {
-            mock.Setup(x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(It.IsAny<SourceText>());
-            mock.Setup(x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>())).Returns(It.IsAny<SyntaxTree>());
+            mock.Setup(
+                x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>()))
+                .Returns(It.IsAny<SourceText>());
+            mock.Setup(
+                x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>()))
+                .Returns(It.IsAny<SyntaxTree>());
 
-            //solutionFactoryMock.Setup(x => x.CreateWithProject())
-            objectUnderTest = new SolutionBLL(mock.Object, solutionFactoryMock.Object);
+            objectUnderTest = new SolutionBLL(mock.Object);
         }
 
         [TestCleanup]
@@ -80,7 +84,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
             CustomSourceText textB = new CustomSourceText();
             SyntaxTree syntaxTreeA = Mock.Of<SyntaxTree>();
             SyntaxTree syntaxTreeB = Mock.Of<SyntaxTree>();
-            
+
             mock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
             mock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
             mock.Setup(x => x.ParseSyntaxTree(textA, It.IsAny<ParseOptions>(), "a", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeA);
@@ -128,14 +132,25 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetProject_InputNullProjectNameAndEmptyCollection_ReturnsProjectWithoutDocuments()
         {
-            var solutionWithEmptyProject = new CustomSolution(new AdhocWorkspace().CurrentSolution.AddProject(ProjectId.CreateNewId(""), "", "", LanguageNames.CSharp));
+            var result = objectUnderTest.GetProject(new Dictionary<string, string>(), null).Documents;
 
-            solutionFactoryMock.Setup(
-               x => x.CreateWithProject(It.IsAny<ProjectId>(), objectUnderTest.ProjectName, objectUnderTest.AssemblyName, It.IsAny<IEnumerable<MetadataReference>>())).Returns(solutionWithEmptyProject);
+            Assert.IsFalse(result.Any());
+        }
+
+        [TestMethod]
+        public void GetProject_Input2CertainSources_returnsMethodWith2CertainDocs()
+        {
+            CustomSourceText textA = new CustomSourceText();
+            CustomSourceText textB = new CustomSourceText();
             
-            var result = objectUnderTest.GetProject(new Dictionary<string, string>(), null);
+            mock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
+            mock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
 
-            Assert.IsFalse(result.Documents.Any());
+            var result = objectUnderTest.GetProject(input, null).Documents;
+
+            Assert.IsTrue(result.Count() == 2);
+            Assert.IsTrue(result.ElementAt(0).Name == "a");
+            Assert.IsTrue(result.ElementAt(1).Name == "b");
         }
     }
 }

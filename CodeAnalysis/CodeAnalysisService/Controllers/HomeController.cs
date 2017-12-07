@@ -17,6 +17,8 @@ namespace CodeAnalysisService.Controllers
         private readonly string DefaultCsHarpExtension = ".cs";
         private readonly string DefaultAssemblyName = "ilevel";
 
+        public string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
+
 
         public HomeController(IDiagnosticService diagnosticService, ISolutionCreator solutionCreator)
         {
@@ -66,8 +68,10 @@ namespace CodeAnalysisService.Controllers
                 throw new NullReferenceException();
             if (diagnostics.Count() == 0)
             {
-                var proj = _solutionCreator.GetProject(files, "SomeName");
+                var proj = _solutionCreator.GetProject(files);
                 var result = _diagnosticService.GetCompilationDiagnostic(proj, AnalyzerProvider.Analyzers.ToImmutableArray());
+                if (result.Count() == 0)
+                    return Json(OkMessage);
                 return Json(result);
             }
             else

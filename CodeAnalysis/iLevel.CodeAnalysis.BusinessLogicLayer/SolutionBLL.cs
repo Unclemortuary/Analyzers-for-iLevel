@@ -12,7 +12,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
         private string _defaultAssemblyName = "iLevelAssembly";
 
         private readonly ICustomSyntaxFactory _customSyntaxFactory;
-        private readonly ICustomSolutionFactory _customSolutionFactory;
 
         private readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         private readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
@@ -22,11 +21,10 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
         public string ProjectName { get { return _defaultProjectName; } }
         public string AssemblyName { get { return _defaultAssemblyName; } }
 
-        public SolutionBLL(ICustomSyntaxFactory factory, ICustomSolutionFactory customSolutionFactory)
+        public SolutionBLL(ICustomSyntaxFactory factory)
         {
             if (factory != null)
                 _customSyntaxFactory = factory;
-            _customSolutionFactory = customSolutionFactory;
         }
 
         public IEnumerable<SyntaxTree> GetSyntaxTrees(Dictionary<string, string> sources)
@@ -46,19 +44,14 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
         {
             projectName = projectName ?? _defaultProjectName;
             ProjectId id = ProjectId.CreateNewId(projectName);
+            Solution sol = new AdhocWorkspace().CurrentSolution
+                .AddProject(id, projectName, _defaultAssemblyName, LanguageNames.CSharp)
+                .AddMetadataReferences(id, new MetadataReference[] { CorlibReference, SystemCoreReference, CSharpSymbolsReference, CodeAnalysisReference });
 
-            CustomSolution solution = _customSolutionFactory
-                .CreateWithProject(id,
-                projectName,
-                _defaultAssemblyName,
-                new MetadataReference[] { CorlibReference, SystemCoreReference, CSharpSymbolsReference, CodeAnalysisReference });
-                
             foreach (var source in sources)
-            {
-                solution = _customSolutionFactory.AddDocument(DocumentId.CreateNewId(id, source.Key), source.Key, _customSyntaxFactory.GetSourceText(source.Value), solution);
-            }
+                sol = sol.AddDocument(DocumentId.CreateNewId(id, source.Key), source.Key, _customSyntaxFactory.GetSourceText(source.Value));
 
-            return solution.Projects.First();
+            return sol.Projects.First();
         }
 
         public CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName)
