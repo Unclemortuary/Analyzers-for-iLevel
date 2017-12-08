@@ -178,6 +178,7 @@
     <Compile Include="CommonInterfaces\ISolutionCreator.cs" />
     <Compile Include="CustomFactories\CustomSolutionFactory.cs" />
     <Compile Include="CustomFactories\CustomSyntaxFactory.cs" />
+    <Compile Include="CustomFactories\ReferenceResources.cs" />
     <Compile Include="CustomSolution.cs" />
     <Compile Include="DiagnosticBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

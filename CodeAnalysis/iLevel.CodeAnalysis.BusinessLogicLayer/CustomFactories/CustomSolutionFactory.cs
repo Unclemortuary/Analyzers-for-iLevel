@@ -2,37 +2,24 @@
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
-
+using System.Linq;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.CustomFactories
 {
-    public class CustomSolutionFactory : ICustomSolutionFactory
+    class CustomSolutionFactory : ICustomSolutionFactory
     {
-        public CustomSolution AddDocument(DocumentId id, string name, SourceText text, CustomSolution solution)
+        public void Create(string name, string assemblyName, out CustomSolution solution)
         {
-            solution.Solution =  solution.Solution.AddDocument(id, name, text);
-            return solution;
+            solution = new CustomSolution(new AdhocWorkspace().CurrentSolution);
+            var projectId = ProjectId.CreateNewId(name);
+            solution.Solution = solution.Solution.AddProject(projectId, name, assemblyName, LanguageNames.CSharp)
+                .AddMetadataReferences(projectId, ReferenceResources.metadataReferences);
         }
 
-        public CustomSolution AddProject(ProjectId id, string name, string assemblyName)
+        public void AddDocument(string name, SourceText text, ref CustomSolution solution)
         {
-            var custom = new CustomSolution(new AdhocWorkspace().CurrentSolution);
-            custom.Solution = custom.Solution.AddProject(id, name, assemblyName, LanguageNames.CSharp);
-            return custom;
-        }
-
-        public CustomSolution Create()
-        {
-            return new CustomSolution(new AdhocWorkspace().CurrentSolution);
-        }
-
-        public CustomSolution CreateWithProject(ProjectId id, string name, string assemblyName, IEnumerable<MetadataReference> metadataReference)
-        {
-            var solutionWithProject = new CustomSolution(new AdhocWorkspace().CurrentSolution).AddProject(id, name, assemblyName);
-            solutionWithProject.Solution = solutionWithProject.Solution.AddMetadataReferences(id, metadataReference);
-            return solutionWithProject;
+            solution.Solution = solution.Solution.AddDocument(DocumentId.CreateNewId(solution.ProjectId), name, text);
         }
     }
-
-
 }

@@ -8,11 +8,11 @@ using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.CustomFactories
 {
-    internal class CustomSyntaxFactory : ICustomSyntaxFactory
+    class CustomSyntaxFactory : ICustomSyntaxFactory
     {
         public CSharpCompilation Create(string assemblyName, IEnumerable<SyntaxTree> syntaxTrees = null, IEnumerable<MetadataReference> references = null, CSharpCompilationOptions options = null)
         {
-            return CSharpCompilation.Create(assemblyName, syntaxTrees, references, options);
+            return CSharpCompilation.Create(assemblyName, syntaxTrees, references, options).AddReferences(ReferenceResources.metadataReferences);
         }
 
         public SourceText GetSourceText(string text, Encoding encoding = null, SourceHashAlgorithm checksumAlgorithm = SourceHashAlgorithm.Sha1)

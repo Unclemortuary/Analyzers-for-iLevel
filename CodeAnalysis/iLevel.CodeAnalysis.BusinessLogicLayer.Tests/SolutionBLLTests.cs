@@ -42,7 +42,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
             mock.Setup(x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(It.IsAny<SourceText>());
             mock.Setup(x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>())).Returns(It.IsAny<SyntaxTree>());
 
-            //solutionFactoryMock.Setup(x => x.CreateWithProject())
+            
             objectUnderTest = new SolutionBLL(mock.Object, solutionFactoryMock.Object);
         }
 
@@ -128,14 +128,61 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetProject_InputNullProjectNameAndEmptyCollection_ReturnsProjectWithoutDocuments()
         {
-            var solutionWithEmptyProject = new CustomSolution(new AdhocWorkspace().CurrentSolution.AddProject(ProjectId.CreateNewId(""), "", "", LanguageNames.CSharp));
+            var solutionMock = new Mock<CustomSolution>(new AdhocWorkspace().CurrentSolution);
+            Project proj = new AdhocWorkspace().CurrentSolution.AddProject(objectUnderTest.ProjectName, objectUnderTest.AssemblyName, LanguageNames.CSharp);
+            CustomSolution solution = solutionMock.Object;
+
+            solutionMock.SetupGet(
+                x => x.Projects).Returns(new List<Project>() { proj });
 
             solutionFactoryMock.Setup(
-               x => x.CreateWithProject(It.IsAny<ProjectId>(), objectUnderTest.ProjectName, objectUnderTest.AssemblyName, It.IsAny<IEnumerable<MetadataReference>>())).Returns(solutionWithEmptyProject);
-            
-            var result = objectUnderTest.GetProject(new Dictionary<string, string>(), null);
+                x => x.Create(objectUnderTest.ProjectName, objectUnderTest.AssemblyName, out solution));
 
-            Assert.IsFalse(result.Documents.Any());
+            var result = objectUnderTest.GetProject(new Dictionary<string, string>(), null).Documents;
+
+            Assert.IsFalse(result.Any());
+        }
+
+        [TestMethod]
+        public void GetProject_Input2Sources_CallsMethodForDocsAdd2Times()
+        {
+            var solutionMock = new Mock<CustomSolution>(new AdhocWorkspace().CurrentSolution);
+            Project proj = new AdhocWorkspace().CurrentSolution.AddProject(objectUnderTest.ProjectName, objectUnderTest.AssemblyName, LanguageNames.CSharp);
+            CustomSolution solution = solutionMock.Object;
+
+            solutionMock.SetupGet(
+                x => x.Projects).Returns(new List<Project>() { proj });
+            solutionFactoryMock.Setup(
+                x => x.Create(objectUnderTest.ProjectName, objectUnderTest.AssemblyName, out solution));
+
+            var result = objectUnderTest.GetProject(input, null).Documents;
+
+            solutionFactoryMock.Verify(x => x.AddDocument(It.IsAny<string>(), It.IsAny<SourceText>(), ref solution), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void GetProject_Input2CertainSources_CallsMethodForDocsAdd2TimesWithCertainSources()
+        {
+            var solutionMock = new Mock<CustomSolution>(new AdhocWorkspace().CurrentSolution);
+            Project proj = new AdhocWorkspace().CurrentSolution.AddProject("Some Name", objectUnderTest.AssemblyName, LanguageNames.CSharp);
+            CustomSolution solution = solutionMock.Object;
+
+            CustomSourceText textA = new CustomSourceText();
+            CustomSourceText textB = new CustomSourceText();
+            mock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
+            mock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
+
+            solutionMock.SetupGet(
+                x => x.Projects).Returns(new List<Project>() { proj });
+            solutionFactoryMock.Setup(
+                x => x.Create("Some Name", objectUnderTest.AssemblyName, out solution));
+
+            var result = objectUnderTest.GetProject(input, "Some Name");
+
+            Assert.AreEqual(result.Name, "Some Name");
+            solutionFactoryMock.Verify(x => x.AddDocument("a", textA, ref solution));
+            solutionFactoryMock.Verify(x => x.AddDocument("b", textB, ref solution));
+            
         }
     }
 }

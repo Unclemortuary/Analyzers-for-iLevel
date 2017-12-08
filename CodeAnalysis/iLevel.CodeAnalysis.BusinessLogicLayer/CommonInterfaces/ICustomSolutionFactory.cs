@@ -6,9 +6,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces
 {
     public interface ICustomSolutionFactory
     {
-        CustomSolution Create();
-        CustomSolution CreateWithProject(ProjectId id, string name, string assemblyName, IEnumerable<MetadataReference> metadataReference);
-        CustomSolution AddProject(ProjectId id, string name, string assemblyName);
-        CustomSolution AddDocument(DocumentId id, string name, SourceText text, CustomSolution solution);
+        void Create(string name, string assemblyName, out CustomSolution solution);
+        void AddDocument(string name, SourceText text, ref CustomSolution solution);
     }
 }
