@@ -18,8 +18,8 @@ namespace CodeAnalysisService.Tests
     [TestClass]
     public class HomeControllerTests
     {
-        Mock<IDiagnosticService> diagnosticServiceMock = new Mock<IDiagnosticService>();
-        Mock<ISolutionCreator> solutionCreatorMock = new Mock<ISolutionCreator>();
+        Mock<IDiagnosticProvider> diagnosticServiceMock = new Mock<IDiagnosticProvider>();
+        Mock<ISolutionProvider> solutionCreatorMock = new Mock<ISolutionProvider>();
         Mock<HttpFileCollectionBase> filesMock = new Mock<HttpFileCollectionBase>();
         Mock<HttpRequestBase> requestMock = new Mock<HttpRequestBase>();
         Mock<HttpContextBase> contextMock = new Mock<HttpContextBase>();
@@ -96,7 +96,7 @@ new class A {
         }
 
         [TestMethod]
-        public void GetCompilationDiagnostic_InputNullDiagnosticReturned_ThrowsNullReferenceExc()
+        public void GetCompilationDiagnostic_DiagnosticServiceCausesNullResult_ThrowsNullReferenceExc()
         {
             diagnosticServiceMock.Reset();
             diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(It.IsAny<CSharpCompilation>())).Returns<IEnumerable<string>>(null);

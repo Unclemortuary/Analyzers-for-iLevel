@@ -1,7 +1,6 @@
 ﻿using Moq;
 using System;
 using System.Linq;
-using System.Threading;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -9,20 +8,21 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Providers;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
 {
     [TestClass]
-    public class DiagnosticBLLTests
+    public class DiagnosticProviderTests
     {
-        DiagnosticBLL objectUnderTest;
+        DiagnosticProvider objectUnderTest;
         List<Mock<Diagnostic>> diagnosticMocks;
 
         [TestInitialize]
         public void Setup()
         {
             diagnosticMocks = new List<Mock<Diagnostic>>() { new Mock<Diagnostic>(), new Mock<Diagnostic>(), new Mock<Diagnostic>() };
-            objectUnderTest = new DiagnosticBLL();
+            objectUnderTest = new DiagnosticProvider();
         }
 
         [TestCleanup]

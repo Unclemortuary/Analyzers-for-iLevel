@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
-namespace iLevel.CodeAnalysis.BusinessLogicLayer
+namespace iLevel.CodeAnalysis.BusinessLogicLayer.Providers
 {
-    public class DiagnosticBLL : IDiagnosticService
+    public class DiagnosticProvider : IDiagnosticProvider
     {
 
         public IEnumerable<string> GetCompilationDiagnostic(CSharpCompilation compilation)

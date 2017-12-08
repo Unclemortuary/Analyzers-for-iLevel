@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces
 {
-    public interface ISolutionCreator
+    public interface ISolutionProvider
     {
         IEnumerable<SyntaxTree> GetSyntaxTrees(Dictionary<string, string> sources);
         CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName);

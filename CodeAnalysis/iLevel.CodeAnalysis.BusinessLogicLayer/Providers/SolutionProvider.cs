@@ -4,24 +4,24 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
-namespace iLevel.CodeAnalysis.BusinessLogicLayer
+namespace iLevel.CodeAnalysis.BusinessLogicLayer.Providers
 {
-    public class SolutionBLL : ISolutionCreator
+    public class SolutionProvider : ISolutionProvider
     {
         private string _defaultProjectName = "iLevelProject";
         private string _defaultAssemblyName = "iLevelAssembly";
 
         private readonly ICustomSyntaxFactory _customSyntaxFactory;
         private readonly ICustomSolutionFactory _customSolutionFactory;
-        
 
         public string ProjectName { get { return _defaultProjectName; } }
         public string AssemblyName { get { return _defaultAssemblyName; } }
 
-        public SolutionBLL(ICustomSyntaxFactory factory)
+        public SolutionProvider(ICustomSyntaxFactory factory, ICustomSolutionFactory customSolutionFactory)
         {
             if (factory != null)
                 _customSyntaxFactory = factory;
+            _customSolutionFactory = customSolutionFactory;
         }
 
         public IEnumerable<SyntaxTree> GetSyntaxTrees(Dictionary<string, string> sources)
@@ -47,7 +47,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
                 _customSolutionFactory
                     .AddDocument(source.Key, _customSyntaxFactory.GetSourceText(source.Value), ref solution);
 
-            return sol.Projects.First();
+            return solution.Projects.First();
         }
 
         public CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> syntaxTrees, string assemblyName)

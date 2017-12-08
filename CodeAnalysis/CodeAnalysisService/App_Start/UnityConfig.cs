@@ -1,6 +1,6 @@
 using System;
 using Unity;
-using iLevel.CodeAnalysis.BusinessLogicLayer;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Infrastructure;
 
 namespace CodeAnalysisService
 {

@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Infrastructure;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.CustomFactories
 {

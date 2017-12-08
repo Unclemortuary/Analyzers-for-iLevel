@@ -1,9 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System.Collections.Generic;
 using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
-using System.Linq;
-using Microsoft.CodeAnalysis.CSharp;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Infrastructure;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.CustomFactories
 {

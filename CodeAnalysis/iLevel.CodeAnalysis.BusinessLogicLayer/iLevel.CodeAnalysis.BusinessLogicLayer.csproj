@@ -172,16 +172,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommonInterfaces\ICustomSolutionFactory.cs" />
     <Compile Include="CommonInterfaces\ICustomSyntaxFactory.cs" />
-    <Compile Include="CommonInterfaces\IDiagnosticService.cs" />
-    <Compile Include="CommonInterfaces\ISolutionCreator.cs" />
+    <Compile Include="CommonInterfaces\IDiagnosticProvider.cs" />
+    <Compile Include="CommonInterfaces\ISolutionProvider.cs" />
+    <Compile Include="CustomFactories\CustomSolutionFactory.cs" />
     <Compile Include="CustomFactories\CustomSyntaxFactory.cs" />
-    <Compile Include="CustomFactories\ReferenceResources.cs" />
+    <Compile Include="Infrastructure\ReferenceResources.cs" />
     <Compile Include="CustomSolution.cs" />
-    <Compile Include="DiagnosticBLL.cs" />
+    <Compile Include="Providers\DiagnosticProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceRegistrator.cs" />
-    <Compile Include="SolutionBLL.cs" />
+    <Compile Include="Infrastructure\ServiceRegistrator.cs" />
+    <Compile Include="Providers\SolutionProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj">

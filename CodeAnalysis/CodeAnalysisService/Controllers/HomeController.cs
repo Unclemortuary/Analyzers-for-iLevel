@@ -11,8 +11,8 @@ namespace CodeAnalysisService.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IDiagnosticService _diagnosticService;
-        private readonly ISolutionCreator _solutionCreator;
+        private readonly IDiagnosticProvider _diagnosticService;
+        private readonly ISolutionProvider _solutionCreator;
 
         private readonly string DefaultCsHarpExtension = ".cs";
         private readonly string DefaultAssemblyName = "ilevel";
@@ -20,7 +20,7 @@ namespace CodeAnalysisService.Controllers
         public string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
 
 
-        public HomeController(IDiagnosticService diagnosticService, ISolutionCreator solutionCreator)
+        public HomeController(IDiagnosticProvider diagnosticService, ISolutionProvider solutionCreator)
         {
             _diagnosticService = diagnosticService;
             _solutionCreator = solutionCreator;

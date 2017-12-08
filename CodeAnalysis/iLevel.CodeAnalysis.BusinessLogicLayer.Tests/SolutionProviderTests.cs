@@ -7,8 +7,8 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis;
 using Moq;
 using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
-using System.Linq.Expressions;
-using System;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Providers;
+
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
 {
@@ -26,7 +26,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
     }
 
     [TestClass]
-    public class SolutionBLLTests
+    public class SolutionProviderTests
     {
         Dictionary<string, string> input = new Dictionary<string, string>
             {
@@ -34,7 +34,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
                 { "b", "2" }
             };
         List<SyntaxTree> inputList = new List<SyntaxTree>() { Mock.Of<SyntaxTree>(), Mock.Of<SyntaxTree>() };
-        SolutionBLL objectUnderTest;
+        SolutionProvider objectUnderTest;
         Mock<ICustomSyntaxFactory> mock = new Mock<ICustomSyntaxFactory>();
         Mock<ICustomSolutionFactory> solutionFactoryMock = new Mock<ICustomSolutionFactory>();
 
@@ -49,7 +49,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
                 .Returns(It.IsAny<SyntaxTree>());
 
             
-            objectUnderTest = new SolutionBLL(mock.Object, solutionFactoryMock.Object);
+            objectUnderTest = new SolutionProvider(mock.Object, solutionFactoryMock.Object);
         }
 
         [TestCleanup]
