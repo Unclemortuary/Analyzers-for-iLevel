@@ -12,11 +12,8 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
         private string _defaultAssemblyName = "iLevelAssembly";
 
         private readonly ICustomSyntaxFactory _customSyntaxFactory;
-
-        private readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-        private readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
-        private readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
-        private readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
+        private readonly ICustomSolutionFactory _customSolutionFactory;
+        
 
         public string ProjectName { get { return _defaultProjectName; } }
         public string AssemblyName { get { return _defaultAssemblyName; } }
@@ -43,13 +40,12 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
         public Project GetProject(Dictionary<string, string> sources, string projectName = null)
         {
             projectName = projectName ?? _defaultProjectName;
-            ProjectId id = ProjectId.CreateNewId(projectName);
-            Solution sol = new AdhocWorkspace().CurrentSolution
-                .AddProject(id, projectName, _defaultAssemblyName, LanguageNames.CSharp)
-                .AddMetadataReferences(id, new MetadataReference[] { CorlibReference, SystemCoreReference, CSharpSymbolsReference, CodeAnalysisReference });
+            CustomSolution solution;
+            _customSolutionFactory.Create(projectName, _defaultAssemblyName, out solution);
 
             foreach (var source in sources)
-                sol = sol.AddDocument(DocumentId.CreateNewId(id, source.Key), source.Key, _customSyntaxFactory.GetSourceText(source.Value));
+                _customSolutionFactory
+                    .AddDocument(source.Key, _customSyntaxFactory.GetSourceText(source.Value), ref solution);
 
             return sol.Projects.First();
         }
@@ -60,9 +56,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer
             if (syntaxTrees.Count() == 0)
                 return null;
 
-            return _customSyntaxFactory.Create(assembly, 
-                syntaxTrees, 
-                new MetadataReference[] { CorlibReference, SystemCoreReference, CSharpSymbolsReference, CodeAnalysisReference });
+            return _customSyntaxFactory.Create(assembly, syntaxTrees);
         }
     }
 }
