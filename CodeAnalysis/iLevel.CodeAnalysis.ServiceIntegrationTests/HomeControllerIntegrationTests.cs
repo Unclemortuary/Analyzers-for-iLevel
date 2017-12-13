@@ -4,6 +4,7 @@ using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CodeAnalysisService;
 using CodeAnalysisService.Controllers;
+using iLevel.CodeAnalysis.ServiceIntegrationTests.Common;
 using Unity;
 
 namespace iLevel.CodeAnalysis.ServiceIntegrationTests
@@ -42,7 +43,7 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests
         [ExpectedException(typeof(ArgumentException))]
         public void AnalyzersReferencesRegistrationNegativeTest()
         {
-            string inputFile = @"
+            string argumentUnderscoreTest = @"
     class Program
     {
         static void Main(string[] args___)
@@ -51,9 +52,37 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests
         }
     }
 ";
-            _input.Add("Program", inputFile);
+            _input.Add("Program", argumentUnderscoreTest);
             var controller = UnityConfig.Container.Resolve<HomeController>();
             controller.GetCompilationDiagnostic(_input);
+        }
+
+        [TestMethod]
+        public void FilesWithoutProgramMethod_GetCorrespondingMessage()
+        {
+            string argumentUnderscoreTest = @"
+namespace Test_classes_for_analyzer
+{
+    class Program
+    {
+        static void Main(string[] args___) { }
+    }
+}";
+            _input.Add("Program", argumentUnderscoreTest);
+
+            UnityConfig.RegisterServices();
+            AnalyzerConfig.RegisterAnalyzers(AnalyzerProvider.Analyzers);
+
+            var controller = UnityConfig.Container.Resolve<HomeController>();
+            var result = (List<string>) controller.GetCompilationDiagnostic(_input).Data;
+            var expected = new ServiceDiagnosticResult()
+            {
+                Location = {FileName = "Program", Line = 6, Column = 26},
+                SeveretyType = SeveretyType.Warning,
+                AnalyzerMessage = "Rename argument name",
+                AnalyzerID = "ILVL00001"
+            };
+            ServiceDiagnosticVerifier.Verify(expected, result[0]);
         }
     }
 }

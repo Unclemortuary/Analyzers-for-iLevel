@@ -220,6 +220,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\ServiceDiagnosticResultElements.cs" />
+    <Compile Include="Common\ServiceDiagnosticVerifier.cs" />
     <Compile Include="HomeControllerIntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
