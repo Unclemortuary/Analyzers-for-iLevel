@@ -6,7 +6,7 @@ using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Providers
 {
-    public class SolutionProvider : ISolutionProvider
+    class SolutionProvider : ISolutionProvider
     {
         private string _defaultProjectName = "iLevelProject";
         private string _defaultAssemblyName = "iLevelAssembly";
@@ -14,13 +14,12 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Providers
         private readonly ICustomSyntaxFactory _customSyntaxFactory;
         private readonly ICustomSolutionFactory _customSolutionFactory;
 
-        public string ProjectName { get { return _defaultProjectName; } }
-        public string AssemblyName { get { return _defaultAssemblyName; } }
+        public string ProjectName => _defaultProjectName;
+        public string AssemblyName => _defaultAssemblyName;
 
         public SolutionProvider(ICustomSyntaxFactory factory, ICustomSolutionFactory customSolutionFactory)
         {
-            if (factory != null)
-                _customSyntaxFactory = factory;
+            _customSyntaxFactory = factory;
             _customSolutionFactory = customSolutionFactory;
         }
 
@@ -28,10 +27,10 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Providers
         {
             List<SyntaxTree> list = new List<SyntaxTree>(sources.Count);
 
-            foreach (var fileName in sources.Keys)
+            foreach (var file in sources)
             {
-                var stringText = _customSyntaxFactory.GetSourceText(sources[fileName]);
-                list.Add(_customSyntaxFactory.ParseSyntaxTree(text: stringText, path: fileName));
+                var stringText = _customSyntaxFactory.GetSourceText(file.Value);
+                list.Add(_customSyntaxFactory.ParseSyntaxTree(text: stringText, path: file.Key));
             }
 
             return list;

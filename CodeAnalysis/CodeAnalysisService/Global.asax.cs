@@ -1,6 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.Optimization;
+using Unity;
 
 namespace CodeAnalysisService
 {
@@ -13,6 +14,7 @@ namespace CodeAnalysisService
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             AnalyzerConfig.RegisterAnalyzers(AnalyzerProvider.Analyzers);
+            UnityConfig.RegisterServices();
         }
     }
 }

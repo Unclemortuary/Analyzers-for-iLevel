@@ -1,33 +1,21 @@
-using System;
-using Unity;
+﻿using Unity;
+using System.Web.Mvc;
 using iLevel.CodeAnalysis.BusinessLogicLayer.Infrastructure;
+using Unity.Mvc5;
 
 namespace CodeAnalysisService
 {
-    /// <summary>
-    /// Specifies the Unity configuration for the main container.
-    /// </summary>
     public static class UnityConfig
     {
-        #region Unity Container
-        private static Lazy<IUnityContainer> container =
-          new Lazy<IUnityContainer>(() =>
-          {
-              var container = new UnityContainer();
-              RegisterTypes(container);
-              return container;
-          });
+        private static UnityContainer _container;
 
-        /// <summary>
-        /// Configured Unity Container.
-        /// </summary>
-        public static IUnityContainer Container => container.Value;
-        #endregion
+        public static UnityContainer Container => _container;
 
-
-        public static void RegisterTypes(IUnityContainer container)
+        public static void RegisterServices()
         {
-            ServiceRegistrator.RegisterServices(container);
+            _container = new UnityContainer();
+            ServiceRegistrator.RegisterServices(_container);
+            DependencyResolver.SetResolver(new UnityDependencyResolver(_container));
         }
     }
 }

@@ -9,7 +9,7 @@ using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Providers
 {
-    public class DiagnosticProvider : IDiagnosticProvider
+    class DiagnosticProvider : IDiagnosticProvider
     {
 
         public IEnumerable<string> GetCompilationDiagnostic(CSharpCompilation compilation)
