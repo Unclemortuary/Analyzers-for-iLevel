@@ -4,7 +4,7 @@
     {
         public Location Location;
         public SeveretyType SeveretyType;
-        public string AnalyzerMessage;
+        public string DiagnosticMessage;
         public string AnalyzerID;
     }
 
@@ -23,7 +23,7 @@
 
     public enum SeveretyType
     {
-        Error = 0,
-        Warning = 1
+        error = 0,
+        warning = 1
     }
 }

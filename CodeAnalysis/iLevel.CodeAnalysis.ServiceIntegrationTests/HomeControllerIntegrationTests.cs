@@ -78,9 +78,9 @@ namespace Test_classes_for_analyzer
             var expected = new ServiceDiagnosticResult()
             {
                 Location = {FileName = "Program", Line = 6, Column = 26},
-                SeveretyType = SeveretyType.Warning,
-                AnalyzerMessage = "Rename argument name",
-                AnalyzerID = "ILVL00001"
+                SeveretyType = SeveretyType.warning,
+                DiagnosticMessage = "Rename argument name",
+                AnalyzerID = "ILVL0001"
             };
             ServiceDiagnosticVerifier.Verify(expected, result[0]);
         }
