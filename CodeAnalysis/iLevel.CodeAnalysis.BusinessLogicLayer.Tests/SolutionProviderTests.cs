@@ -28,35 +28,42 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
     [TestClass]
     public class SolutionProviderTests
     {
-        Dictionary<string, string> input = new Dictionary<string, string>
+        Dictionary<string, string> _input = new Dictionary<string, string>
             {
                 { "a", "1" },
                 { "b", "2" }
             };
-        List<SyntaxTree> inputList = new List<SyntaxTree>() { Mock.Of<SyntaxTree>(), Mock.Of<SyntaxTree>() };
-        SolutionProvider objectUnderTest;
-        Mock<ICustomSyntaxFactory> mock = new Mock<ICustomSyntaxFactory>();
-        Mock<ICustomSolutionFactory> solutionFactoryMock = new Mock<ICustomSolutionFactory>();
+        List<SyntaxTree> _inputList = new List<SyntaxTree>() { Mock.Of<SyntaxTree>(), Mock.Of<SyntaxTree>() };
+        SolutionProvider _objectUnderTest;
+        Mock<ICustomSyntaxFactory> _syntaxFactoryMock = new Mock<ICustomSyntaxFactory>();
+        Mock<ICustomSolutionFactory> _solutionFactoryMock = new Mock<ICustomSolutionFactory>();
+        Mock<CustomSolution> _solutionMock = new Mock<CustomSolution>(new AdhocWorkspace().CurrentSolution);
+        Project _testProject;
 
         [TestInitialize]
         public void Setup()
         {
-            mock.Setup(
+            _syntaxFactoryMock.Setup(
                 x => x.GetSourceText(It.IsAny<string>(), It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>()))
                 .Returns(It.IsAny<SourceText>());
-            mock.Setup(
+            _syntaxFactoryMock.Setup(
                 x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>()))
                 .Returns(It.IsAny<SyntaxTree>());
 
-            
-            objectUnderTest = new SolutionProvider(mock.Object, solutionFactoryMock.Object);
+            _solutionMock.SetupGet(
+                x => x.Projects).Returns(new List<Project>() { _testProject });
+
+            _testProject = new AdhocWorkspace().CurrentSolution.AddProject(_objectUnderTest.ProjectName, _objectUnderTest.AssemblyName, LanguageNames.CSharp);
+
+            _objectUnderTest = new SolutionProvider(_syntaxFactoryMock.Object, _solutionFactoryMock.Object);
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            mock.Reset();
-            objectUnderTest = null;
+            _syntaxFactoryMock.Reset();
+            _solutionMock.Reset();
+            _objectUnderTest = null;
         }
 
 
@@ -65,7 +72,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         {
             Dictionary<string, string> input = new Dictionary<string, string>();
 
-            var result = objectUnderTest.GetSyntaxTrees(input);
+            var result = _objectUnderTest.GetSyntaxTrees(input);
 
             Assert.IsFalse(result.Any());
         }
@@ -73,7 +80,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetSyntaxTrees_NotEmptyDictionary_ReturnsNotEmptyCollection()
         {
-            var result = objectUnderTest.GetSyntaxTrees(input);
+            var result = _objectUnderTest.GetSyntaxTrees(_input);
 
             Assert.AreEqual(2, result.Count());
         }
@@ -81,20 +88,20 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetSyntaxTrees_CertainInput_ReturnsCertainSyntaxTree()
         {
-            mock.Reset();
+            _syntaxFactoryMock.Reset();
             CustomSourceText textA = new CustomSourceText();
             CustomSourceText textB = new CustomSourceText();
             SyntaxTree syntaxTreeA = Mock.Of<SyntaxTree>();
             SyntaxTree syntaxTreeB = Mock.Of<SyntaxTree>();
 
-            mock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
-            mock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
-            mock.Setup(x => x.ParseSyntaxTree(textA, It.IsAny<ParseOptions>(), "a", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeA);
-            mock.Setup(x => x.ParseSyntaxTree(textB, It.IsAny<ParseOptions>(), "b", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeB);
+            _syntaxFactoryMock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
+            _syntaxFactoryMock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
+            _syntaxFactoryMock.Setup(x => x.ParseSyntaxTree(textA, It.IsAny<ParseOptions>(), "a", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeA);
+            _syntaxFactoryMock.Setup(x => x.ParseSyntaxTree(textB, It.IsAny<ParseOptions>(), "b", It.IsAny<System.Threading.CancellationToken>())).Returns(syntaxTreeB);
 
-            var result = objectUnderTest.GetSyntaxTrees(input);
+            var result = _objectUnderTest.GetSyntaxTrees(_input);
 
-            mock.Verify();
+            _syntaxFactoryMock.Verify();
             Assert.IsTrue(result.Contains(syntaxTreeA));
             Assert.IsTrue(result.Contains(syntaxTreeB));
         }
@@ -105,7 +112,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         {
             List<SyntaxTree> inputList = new List<SyntaxTree>();
 
-            var result = objectUnderTest.GetCompilation(inputList, "");
+            var result = _objectUnderTest.GetCompilation(inputList, "");
 
             Assert.IsNull(result);
         }
@@ -113,38 +120,35 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetCompilation_InputCertainCollectionTestAssemblyName_ReturnsTestAssemblyCompilation()
         {
-            var result = objectUnderTest.GetCompilation(inputList, "TestAssembly");
+            var result = _objectUnderTest.GetCompilation(_inputList, "TestAssembly");
 
-            mock.Verify(csf =>
-            csf.Create("TestAssembly", inputList, It.IsAny<IEnumerable<MetadataReference>>(), It.IsAny<CSharpCompilationOptions>()));
+            _syntaxFactoryMock.Verify(csf =>
+            csf.Create("TestAssembly", _inputList, It.IsAny<IEnumerable<MetadataReference>>(), It.IsAny<CSharpCompilationOptions>()));
         }
 
 
         [TestMethod]
         public void GetCompilation_InputCertainCollectionWithNullAssemblyName_ReturnsDefaultProjectCompilation()
         {
-            string defaultName = objectUnderTest.AssemblyName;
+            string defaultName = _objectUnderTest.AssemblyName;
 
-            var result = objectUnderTest.GetCompilation(inputList, null);
+            var result = _objectUnderTest.GetCompilation(_inputList, null);
 
-            mock.Verify(csf =>
+            _syntaxFactoryMock.Verify(csf =>
             csf.Create(defaultName, It.IsAny<IEnumerable<SyntaxTree>>(), It.IsAny<IEnumerable<MetadataReference>>(), It.IsAny<CSharpCompilationOptions>()));
         }
 
         [TestMethod]
         public void GetProject_InputNullProjectNameAndEmptyCollection_ReturnsProjectWithoutDocuments()
         {
-            var solutionMock = new Mock<CustomSolution>(new AdhocWorkspace().CurrentSolution);
-            Project proj = new AdhocWorkspace().CurrentSolution.AddProject(objectUnderTest.ProjectName, objectUnderTest.AssemblyName, LanguageNames.CSharp);
-            CustomSolution solution = solutionMock.Object;
+            CustomSolution solutionMockInstance = _solutionMock.Object;
+            _solutionMock.SetupGet(
+                x => x.Projects).Returns(new List<Project>() { _testProject });
 
-            solutionMock.SetupGet(
-                x => x.Projects).Returns(new List<Project>() { proj });
+            _solutionFactoryMock.Setup(
+                x => x.Create(_objectUnderTest.ProjectName, _objectUnderTest.AssemblyName)).Returns(solutionMockInstance);
 
-            solutionFactoryMock.Setup(
-                x => x.Create(objectUnderTest.ProjectName, objectUnderTest.AssemblyName, out solution));
-
-            var result = objectUnderTest.GetProject(new Dictionary<string, string>(), null).Documents;
+            var result = _objectUnderTest.GetProject(new Dictionary<string, string>(), null).Documents;
 
             Assert.IsFalse(result.Any());
         }
@@ -152,42 +156,34 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         [TestMethod]
         public void GetProject_Input2Sources_CallsMethodForDocsAdd2Times()
         {
-            var solutionMock = new Mock<CustomSolution>(new AdhocWorkspace().CurrentSolution);
-            Project proj = new AdhocWorkspace().CurrentSolution.AddProject(objectUnderTest.ProjectName, objectUnderTest.AssemblyName, LanguageNames.CSharp);
-            CustomSolution solution = solutionMock.Object;
+            CustomSolution solutionMockInstance = _solutionMock.Object;
+            
+            _solutionFactoryMock.Setup(
+                x => x.Create(_objectUnderTest.ProjectName, _objectUnderTest.AssemblyName)).Returns(solutionMockInstance);
 
-            solutionMock.SetupGet(
-                x => x.Projects).Returns(new List<Project>() { proj });
-            solutionFactoryMock.Setup(
-                x => x.Create(objectUnderTest.ProjectName, objectUnderTest.AssemblyName, out solution));
+            var result = _objectUnderTest.GetProject(_input, null).Documents;
 
-            var result = objectUnderTest.GetProject(input, null).Documents;
-
-            solutionFactoryMock.Verify(x => x.AddDocument(It.IsAny<string>(), It.IsAny<SourceText>(), ref solution), Times.Exactly(2));
+            _solutionFactoryMock.Verify(x => x.AddDocument(It.IsAny<string>(), It.IsAny<SourceText>(), ref solutionMockInstance), Times.Exactly(2));
         }
 
         [TestMethod]
         public void GetProject_Input2CertainSources_CallsMethodForDocsAdd2TimesWithCertainSources()
         {
-            var solutionMock = new Mock<CustomSolution>(new AdhocWorkspace().CurrentSolution);
-            Project proj = new AdhocWorkspace().CurrentSolution.AddProject("Some Name", objectUnderTest.AssemblyName, LanguageNames.CSharp);
-            CustomSolution solution = solutionMock.Object;
+            CustomSolution solutionMockInstance = _solutionMock.Object;
 
             CustomSourceText textA = new CustomSourceText();
             CustomSourceText textB = new CustomSourceText();
-            mock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
-            mock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
+            _syntaxFactoryMock.Setup(x => x.GetSourceText("1", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textA);
+            _syntaxFactoryMock.Setup(x => x.GetSourceText("2", It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(textB);
+            
+            _solutionFactoryMock.Setup(
+                x => x.Create("Some Name", _objectUnderTest.AssemblyName)).Returns(solutionMockInstance);
 
-            solutionMock.SetupGet(
-                x => x.Projects).Returns(new List<Project>() { proj });
-            solutionFactoryMock.Setup(
-                x => x.Create("Some Name", objectUnderTest.AssemblyName, out solution));
-
-            var result = objectUnderTest.GetProject(input, "Some Name");
+            var result = _objectUnderTest.GetProject(_input, "Some Name");
 
             Assert.AreEqual(result.Name, "Some Name");
-            solutionFactoryMock.Verify(x => x.AddDocument("a", textA, ref solution));
-            solutionFactoryMock.Verify(x => x.AddDocument("b", textB, ref solution));
+            _solutionFactoryMock.Verify(x => x.AddDocument("a", textA, ref solutionMockInstance));
+            _solutionFactoryMock.Verify(x => x.AddDocument("b", textB, ref solutionMockInstance));
             
         }
     }

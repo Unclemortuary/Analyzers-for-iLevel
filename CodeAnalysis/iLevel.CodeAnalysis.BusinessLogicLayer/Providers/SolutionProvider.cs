@@ -39,8 +39,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Providers
         public Project GetProject(Dictionary<string, string> sources, string projectName = null)
         {
             projectName = projectName ?? _defaultProjectName;
-            CustomSolution solution;
-            _customSolutionFactory.Create(projectName, _defaultAssemblyName, out solution);
+            var solution = _customSolutionFactory.Create(projectName, _defaultAssemblyName);
 
             foreach (var source in sources)
                 _customSolutionFactory

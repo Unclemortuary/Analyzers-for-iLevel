@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer.Infrastructure
 {
-    public class ReferenceResources
+    class ReferenceResources
     {
         private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
         private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);

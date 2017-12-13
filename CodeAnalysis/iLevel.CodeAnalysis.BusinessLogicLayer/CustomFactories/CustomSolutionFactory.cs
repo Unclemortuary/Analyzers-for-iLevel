@@ -7,12 +7,13 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.CustomFactories
 {
     class CustomSolutionFactory : ICustomSolutionFactory
     {
-        public void Create(string name, string assemblyName, out CustomSolution solution)
+        public CustomSolution Create(string name, string assemblyName)
         {
-            solution = new CustomSolution(new AdhocWorkspace().CurrentSolution);
+            CustomSolution solution = new CustomSolution(new AdhocWorkspace().CurrentSolution);
             var projectId = ProjectId.CreateNewId(name);
             solution.Solution = solution.Solution.AddProject(projectId, name, assemblyName, LanguageNames.CSharp)
                 .AddMetadataReferences(projectId, ReferenceResources.metadataReferences);
+            return solution;
         }
 
         public void AddDocument(string name, SourceText text, ref CustomSolution solution)
