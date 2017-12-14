@@ -50,12 +50,12 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
                 x => x.ParseSyntaxTree(It.IsAny<SourceText>(), It.IsAny<ParseOptions>(), It.IsAny<string>(), It.IsAny<System.Threading.CancellationToken>()))
                 .Returns(It.IsAny<SyntaxTree>());
 
-            _solutionMock.SetupGet(
-                x => x.Projects).Returns(new List<Project>() { _testProject });
+            _objectUnderTest = new SolutionProvider(_syntaxFactoryMock.Object, _solutionFactoryMock.Object);
 
             _testProject = new AdhocWorkspace().CurrentSolution.AddProject(_objectUnderTest.ProjectName, _objectUnderTest.AssemblyName, LanguageNames.CSharp);
 
-            _objectUnderTest = new SolutionProvider(_syntaxFactoryMock.Object, _solutionFactoryMock.Object);
+            _solutionMock.SetupGet(
+                x => x.Projects).Returns(new List<Project>() { _testProject });
         }
 
         [TestCleanup]
@@ -142,8 +142,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
         public void GetProject_InputNullProjectNameAndEmptyCollection_ReturnsProjectWithoutDocuments()
         {
             CustomSolution solutionMockInstance = _solutionMock.Object;
-            _solutionMock.SetupGet(
-                x => x.Projects).Returns(new List<Project>() { _testProject });
 
             _solutionFactoryMock.Setup(
                 x => x.Create(_objectUnderTest.ProjectName, _objectUnderTest.AssemblyName)).Returns(solutionMockInstance);
@@ -180,8 +178,7 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
                 x => x.Create("Some Name", _objectUnderTest.AssemblyName)).Returns(solutionMockInstance);
 
             var result = _objectUnderTest.GetProject(_input, "Some Name");
-
-            Assert.AreEqual(result.Name, "Some Name");
+            
             _solutionFactoryMock.Verify(x => x.AddDocument("a", textA, ref solutionMockInstance));
             _solutionFactoryMock.Verify(x => x.AddDocument("b", textB, ref solutionMockInstance));
             
