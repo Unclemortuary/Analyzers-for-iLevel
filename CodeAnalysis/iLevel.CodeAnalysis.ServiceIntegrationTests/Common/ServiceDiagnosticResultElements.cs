@@ -17,8 +17,8 @@
             Column = column;
         }
         public string FileName;
-        public int Line;
-        public int Column;
+        public int? Line;
+        public int? Column;
     }
 
     public enum SeveretyType

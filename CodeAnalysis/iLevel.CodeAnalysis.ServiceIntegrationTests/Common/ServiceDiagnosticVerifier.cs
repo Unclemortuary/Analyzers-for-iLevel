@@ -31,12 +31,13 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests.Common
 
         private static bool CheckLocationCorresponding(ref string diagnostic, Location expectedLocation)
         {
+            
             string stringLocation = "(" + expectedLocation.Line + "," + expectedLocation.Column + ")";
             if (!diagnostic.Contains(expectedLocation.FileName))
                 throw new AssertFailedException(
                     string.Format("File name (\"{0}\") not found in actual diagnostic : {1}",
                     expectedLocation.FileName, diagnostic));
-            else
+            else if (expectedLocation.Line != null && expectedLocation.Column != null)
             {
                 diagnostic = ExcludeSubstring(diagnostic, expectedLocation.FileName);
                 if (!diagnostic.Contains(stringLocation))
@@ -49,6 +50,8 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests.Common
                     return true;
                 }
             }
+            else
+                return true;
         }
 
         private static string ExcludeSubstring(string baseString, string subString)

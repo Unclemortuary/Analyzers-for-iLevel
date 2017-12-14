@@ -181,7 +181,6 @@ namespace iLevel.CodeAnalysis.BusinessLogicLayer.Tests
             
             _solutionFactoryMock.Verify(x => x.AddDocument("a", textA, ref solutionMockInstance));
             _solutionFactoryMock.Verify(x => x.AddDocument("b", textB, ref solutionMockInstance));
-            
         }
     }
 }
