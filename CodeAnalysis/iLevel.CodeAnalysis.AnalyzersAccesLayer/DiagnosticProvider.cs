@@ -1,32 +1,43 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using iLevel.CodeAnalysis.AnalyzersAccesLayer.Intefaces;
+using Microsoft.CodeAnalysis.Text;
 
 namespace iLevel.CodeAnalysis.AnalyzersAccesLayer
 {
-    public interface IDiagnosticProvider
-    {
-        Report GetAnalyzersDiagnostic();
-        Report GetCompilationDiagnostic();
-    }
-
     class DiagnosticProvider : IDiagnosticProvider
     {
-        public Report GetAnalyzersDiagnosticReport()
+        private readonly ISolutionFactory _solutionFactrory;
+        private string _projectName = null;
+        private string _assemblyName = null;
+
+        public string ProjectName => _projectName ?? "iLevelProject";
+        public string AssemblyName => _assemblyName ?? "iLevel";
+
+        public DiagnosticProvider(ISolutionFactory solutionFactory)
+        {
+            _solutionFactrory = solutionFactory;
+        }
+
+        private Report GetSpecifiedDiagnostic()
         {
 
         }
 
-        public Report GetCompilationDiagnostic()
+        private Project GetProject(DTO sourcesDTO)
         {
-
+            Project projectUnderDiagnostic = new AdhocWorkspace().CurrentSolution.AddProject();
+            var solution = _solutionFactrory.Create()
         }
 
-        private DiagnosticResult[] GetUnsortedDiagnostic()
+        private DiagnosticResult[] GetUnsortedDiagnostic(DTO sourcesDTO)
         {
-
+            
         }
     }
 }

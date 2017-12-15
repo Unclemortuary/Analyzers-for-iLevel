@@ -297,6 +297,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\DTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -316,7 +317,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="CommonService\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj">
