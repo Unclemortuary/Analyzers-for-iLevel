@@ -28,6 +28,8 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests
         {
             _input = null;
             _controllerUnderTest = null;
+            UnityConfig.Container.Dispose();
+            AnalyzerProvider.Analyzers.Clear();
         }
 
         [TestMethod]
