@@ -1,6 +1,5 @@
-﻿using iLevel.CodeAnalysis.BusinessLogicLayer.CustomFactories;
-using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
-using iLevel.CodeAnalysis.BusinessLogicLayer.Providers;
+﻿using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
+using iLevel.CodeAnalysis.AnalyzersAccesLayer.CustomFactories;
 using Unity;
 
 namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure
@@ -9,10 +8,8 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure
     {
         public static void RegisterServices(IUnityContainer container)
         {
+            container.RegisterType<ISyntaxFactory, CustomSyntaxFactory>();
             container.RegisterType<IDiagnosticProvider, DiagnosticProvider>();
-            container.RegisterType<ISolutionProvider, SolutionProvider>();
-            container.RegisterType<ICustomSyntaxFactory, CustomSyntaxFactory>();
-            container.RegisterType<ICustomSolutionFactory, CustomSolutionFactory>();
         }
     }
 }

@@ -1,13 +1,11 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using System.Collections.Generic;
+using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 
-namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Intefaces
+namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces
 {
     public interface IDiagnosticProvider
     {
-        Report GetDiagnostic();
+        IEnumerable<ReportDTO> GetDiagnostic(IEnumerable<SourceFileDTO> sources, HashSet<DiagnosticAnalyzer> analyzers);
     }
 }

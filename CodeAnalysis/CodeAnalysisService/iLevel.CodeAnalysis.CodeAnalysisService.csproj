@@ -319,6 +319,10 @@
     <Folder Include="CommonService\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\iLevel.CodeAnalysis.AnalyzersAccesLayer\iLevel.CodeAnalysis.AnalyzersAccesLayer.csproj">
+      <Project>{b7f84625-ed4c-4ed1-b913-afe8cb8063ff}</Project>
+      <Name>iLevel.CodeAnalysis.AnalyzersAccesLayer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj">
       <Project>{cba00023-e9b2-44ae-902e-3bf37a4703ae}</Project>
       <Name>iLevel.CodeAnalysis.BestPractices</Name>

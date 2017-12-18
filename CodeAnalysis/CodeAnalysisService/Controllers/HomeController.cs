@@ -5,14 +5,14 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Net;
 using System.IO;
-using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
+using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
+using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
 
 namespace CodeAnalysisService.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IDiagnosticProvider _diagnosticService;
-        private readonly ISolutionProvider _solutionCreator;
+        private readonly IDiagnosticProvider _diagnosticProvider;
 
         private readonly string DefaultCsHarpExtension = ".cs";
         private readonly string DefaultAssemblyName = "ilevel";
@@ -20,14 +20,25 @@ namespace CodeAnalysisService.Controllers
         public string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
 
 
-        public HomeController(IDiagnosticProvider diagnosticService, ISolutionProvider solutionCreator)
+        public HomeController(IDiagnosticProvider diagnosticProvider)
         {
-            _diagnosticService = diagnosticService;
-            _solutionCreator = solutionCreator;
+            _diagnosticProvider = diagnosticProvider;
         }
 
         public ActionResult Index()
         {
+            SourceFileDTO sourceFile = new SourceFileDTO
+            {
+                Name = "Program",
+                Text = @"
+class A {
+    public static void Program(string args[])
+    {
+        var some = new B();
+    }
+}"
+            };
+            var result = _diagnosticProvider.GetDiagnostic(new List<SourceFileDTO> { sourceFile }, AnalyzerProvider.Analyzers);
             return View(nameof(this.Index));
         }
 
@@ -55,27 +66,7 @@ namespace CodeAnalysisService.Controllers
                     }
                 }
             }
-            var returnableMessage = GetCompilationDiagnostic(normalFiles);
-            return returnableMessage;
-        }
-
-        internal JsonResult GetCompilationDiagnostic(Dictionary<string, string> files)
-        {
-            files = files ?? throw new ArgumentNullException(nameof(files));
-            var compilation = _solutionCreator.GetCompilation(_solutionCreator.GetSyntaxTrees(files), DefaultAssemblyName);
-            var diagnostics = _diagnosticService.GetCompilationDiagnostic(compilation);
-            if (diagnostics == null)
-                throw new NullReferenceException();
-            if (diagnostics.Count() == 0)
-            {
-                var proj = _solutionCreator.GetProject(files);
-                var result = _diagnosticService.GetCompilationDiagnostic(proj, AnalyzerProvider.Analyzers.ToImmutableArray());
-                if (result.Count() == 0)
-                    return Json(OkMessage);
-                return Json(result);
-            }
-            else
-                return Json(diagnostics);
+            return null;
         }
     }
 }

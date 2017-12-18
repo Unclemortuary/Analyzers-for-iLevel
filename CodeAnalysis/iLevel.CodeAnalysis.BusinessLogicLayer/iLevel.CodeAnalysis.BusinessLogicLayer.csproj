@@ -199,6 +199,8 @@
     <Compile Include="CommonInterfaces\ISolutionProvider.cs" />
     <Compile Include="CustomFactories\CustomSolutionFactory.cs" />
     <Compile Include="CustomFactories\CustomSyntaxFactory.cs" />
+    <Compile Include="DTO\ReportDTO.cs" />
+    <Compile Include="DTO\SourceFileDTO.cs" />
     <Compile Include="Infrastructure\ReferenceResources.cs" />
     <Compile Include="CustomSolution.cs" />
     <Compile Include="Providers\DiagnosticProvider.cs" />
@@ -206,12 +208,8 @@
     <Compile Include="Infrastructure\ServiceRegistrator.cs" />
     <Compile Include="Providers\SolutionProvider.cs" />
     <Compile Include="Service.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj">
-      <Project>{cba00023-e9b2-44ae-902e-3bf37a4703ae}</Project>
-      <Name>iLevel.CodeAnalysis.BestPractices</Name>
-    </ProjectReference>
+    <Compile Include="Specification\ExpressionSpecification.cs" />
+    <Compile Include="Specification\ISpecification.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

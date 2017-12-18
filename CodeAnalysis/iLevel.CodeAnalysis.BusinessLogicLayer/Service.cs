@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
 
 namespace iLevel.CodeAnalysis.BusinessLogicLayer
 {
-    class AnalyzerService : IAnalyzerService
+    class AnalyzerService
     {
-        public bool IsSpecifiedBy(Report r)
-        {
-            if (r.AnalyzerID == "SomeID")
-                return true;
-        }
+        
     }
 }

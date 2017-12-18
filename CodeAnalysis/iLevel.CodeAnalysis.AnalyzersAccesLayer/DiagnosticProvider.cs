@@ -1,43 +1,57 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using iLevel.CodeAnalysis.AnalyzersAccesLayer.Intefaces;
-using Microsoft.CodeAnalysis.Text;
+using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
+using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
+using iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure;
 
 namespace iLevel.CodeAnalysis.AnalyzersAccesLayer
 {
     class DiagnosticProvider : IDiagnosticProvider
     {
-        private readonly ISolutionFactory _solutionFactrory;
+        private readonly ISyntaxFactory _syntaxFactory;
         private string _projectName = null;
         private string _assemblyName = null;
 
         public string ProjectName => _projectName ?? "iLevelProject";
         public string AssemblyName => _assemblyName ?? "iLevel";
 
-        public DiagnosticProvider(ISolutionFactory solutionFactory)
+        public DiagnosticProvider(ISyntaxFactory syntaxFactory)
         {
-            _solutionFactrory = solutionFactory;
+            _syntaxFactory = syntaxFactory;
         }
 
-        private Report GetSpecifiedDiagnostic()
+        public IEnumerable<ReportDTO> GetDiagnostic(IEnumerable<SourceFileDTO> sources, HashSet<DiagnosticAnalyzer> analyzers)
         {
+            List<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
+            List<Diagnostic> result = new List<Diagnostic>();
 
+            foreach (var source in sources)
+            {
+                var sourceText = _syntaxFactory.GetSourceText(source.Text);
+                syntaxTrees.Add(_syntaxFactory.ParseSyntaxTree(text: sourceText, path: source.Name));
+            }
+
+            var compilationWithoutAnalyzers = _syntaxFactory.CreateCompilation(AssemblyName, syntaxTrees);
+            result = compilationWithoutAnalyzers.GetDiagnostics().ToList();
+            if (result.Count == 0)
+            {
+                var compilationWithAnalyzers = _syntaxFactory.CreateCompilationWithAnalyzers(compilationWithoutAnalyzers, analyzers);
+                result = compilationWithAnalyzers.GetAllDiagnosticsAsync().Result.ToList();
+            }
+            return ToDTO(result.AsReadOnly());
         }
 
-        private Project GetProject(DTO sourcesDTO)
+        internal IEnumerable<ReportDTO> ToDTO(IEnumerable<Diagnostic> diagnostic)
         {
-            Project projectUnderDiagnostic = new AdhocWorkspace().CurrentSolution.AddProject();
-            var solution = _solutionFactrory.Create()
+            List<ReportDTO> result = new List<ReportDTO>();
+            foreach (var report in diagnostic)
+            {
+                result.Add(Mapper.Map(report));
+            }
+            return result;
         }
-
-        private DiagnosticResult[] GetUnsortedDiagnostic(DTO sourcesDTO)
-        {
-            
-        }
+        
     }
 }
