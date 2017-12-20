@@ -9,8 +9,11 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure
         public static ReportDTO Map(Diagnostic diagnostic)
         {
             ReportDTO report = new ReportDTO();
+            report.FileName = diagnostic.Location.SourceTree.FilePath ?? "";
+            report.Location = diagnostic.Location.SourceSpan.ToString() ?? "";
             report.Severety = diagnostic.Severity.ToString();
-            report.Report = "//" + diagnostic.ToString() + Environment.NewLine;
+            report.AnalyzerID = diagnostic.Id;
+            report.Message = diagnostic.GetMessage();
             return report;
         }
     }

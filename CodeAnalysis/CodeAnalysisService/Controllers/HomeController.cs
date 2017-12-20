@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using System.Net;
 using System.IO;
-using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
+using CodeAnalysisService.Infrastructure;
 using iLevel.CodeAnalysis.BusinessLogicLayer.Specification;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
 
@@ -14,15 +12,17 @@ namespace CodeAnalysisService.Controllers
     public class HomeController : Controller
     {
         private readonly IDiagnosticProvider _diagnosticProvider;
+        private readonly IMapper _mapper;
 
         private readonly string DefaultCsHarpExtension = ".cs";
 
         public string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
 
 
-        public HomeController(IDiagnosticProvider diagnosticProvider)
+        public HomeController(IDiagnosticProvider diagnosticProvider, IMapper mapper)
         {
             _diagnosticProvider = diagnosticProvider;
+            _mapper = mapper;
         }
 
         public ActionResult Index()
@@ -31,7 +31,7 @@ namespace CodeAnalysisService.Controllers
         }
 
         [HttpPost]
-        public ActionResult Upload()
+        public ActionResult UploadAndReturnDiagnostic()
         {
             if (Request.Files.Count == 0)
                 return new HttpStatusCodeResult(HttpStatusCode.NoContent, "No files was received");
@@ -44,7 +44,7 @@ namespace CodeAnalysisService.Controllers
                 if (upload != null)
                 {
                     if (Path.GetExtension(upload.FileName) != DefaultCsHarpExtension)
-                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Some files has not appropriate format");
+                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Some of files has not appropriate format");
 
                     string fileName = Path.GetFileName(upload.FileName);
                     using (StreamReader streamReader = new StreamReader(upload.InputStream))
@@ -54,7 +54,17 @@ namespace CodeAnalysisService.Controllers
                     }
                 }
             }
-            return null;
+            if (normalFiles.Count > 0)
+            {
+                var sourcesDTO = _mapper.ToSourceFileDTO(normalFiles);
+                var returnedDiagnostic = _diagnosticProvider.GetDiagnostic(sourcesDTO, AnalyzerProvider.Analyzers, new ExpressionSpecification(o => o.Severety != "Hidden"));
+                if (returnedDiagnostic.Count() == 0)
+                    return Json(OkMessage);
+                else
+                    return PartialView("ReportPartial", _mapper.ToReportViewModel(returnedDiagnostic));
+            }
+            else
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
         }
     }
 }
