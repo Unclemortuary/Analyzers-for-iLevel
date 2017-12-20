@@ -193,21 +193,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommonInterfaces\ICustomSolutionFactory.cs" />
-    <Compile Include="CommonInterfaces\ICustomSyntaxFactory.cs" />
-    <Compile Include="CommonInterfaces\IDiagnosticProvider.cs" />
-    <Compile Include="CommonInterfaces\ISolutionProvider.cs" />
-    <Compile Include="CustomFactories\CustomSolutionFactory.cs" />
-    <Compile Include="CustomFactories\CustomSyntaxFactory.cs" />
     <Compile Include="DTO\ReportDTO.cs" />
     <Compile Include="DTO\SourceFileDTO.cs" />
-    <Compile Include="Infrastructure\ReferenceResources.cs" />
-    <Compile Include="CustomSolution.cs" />
-    <Compile Include="Providers\DiagnosticProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Infrastructure\ServiceRegistrator.cs" />
-    <Compile Include="Providers\SolutionProvider.cs" />
-    <Compile Include="Service.cs" />
     <Compile Include="Specification\ExpressionSpecification.cs" />
     <Compile Include="Specification\ISpecification.cs" />
   </ItemGroup>

@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Net;
 using System.IO;
 using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Specification;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
 
 namespace CodeAnalysisService.Controllers
@@ -15,7 +16,6 @@ namespace CodeAnalysisService.Controllers
         private readonly IDiagnosticProvider _diagnosticProvider;
 
         private readonly string DefaultCsHarpExtension = ".cs";
-        private readonly string DefaultAssemblyName = "ilevel";
 
         public string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
 
@@ -27,18 +27,6 @@ namespace CodeAnalysisService.Controllers
 
         public ActionResult Index()
         {
-            SourceFileDTO sourceFile = new SourceFileDTO
-            {
-                Name = "Program",
-                Text = @"
-class A {
-    public static void Program(string args[])
-    {
-        var some = new B();
-    }
-}"
-            };
-            var result = _diagnosticProvider.GetDiagnostic(new List<SourceFileDTO> { sourceFile }, AnalyzerProvider.Analyzers);
             return View(nameof(this.Index));
         }
 

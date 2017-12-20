@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Specification;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
 using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure;
@@ -22,7 +23,7 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer
             _syntaxFactory = syntaxFactory;
         }
 
-        public IEnumerable<ReportDTO> GetDiagnostic(IEnumerable<SourceFileDTO> sources, HashSet<DiagnosticAnalyzer> analyzers)
+        public IEnumerable<ReportDTO> GetDiagnostic(IEnumerable<SourceFileDTO> sources, HashSet<DiagnosticAnalyzer> analyzers, ISpecification specification)
         {
             List<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
             List<Diagnostic> result = new List<Diagnostic>();
@@ -40,7 +41,8 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer
                 var compilationWithAnalyzers = _syntaxFactory.CreateCompilationWithAnalyzers(compilationWithoutAnalyzers, analyzers);
                 result = compilationWithAnalyzers.GetAllDiagnosticsAsync().Result.ToList();
             }
-            return ToDTO(result.AsReadOnly());
+            var dto = ToDTO(result.AsReadOnly());
+            return dto.Where(r => specification.IsStatisfiedBy(r)).ToList();
         }
 
         internal IEnumerable<ReportDTO> ToDTO(IEnumerable<Diagnostic> diagnostic)
