@@ -4,217 +4,171 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.IO;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using CodeAnalysisService.Controllers;
+using CodeAnalysisService.Infrastructure;
+using CodeAnalysisService.Models;
+using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
+using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
-using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace CodeAnalysisService.Tests
 {
     [TestClass]
     public class HomeControllerTests
     {
-        Mock<IDiagnosticProvider> _diagnosticServiceMock = new Mock<IDiagnosticProvider>();
-        Mock<ISolutionProvider> _solutionCreatorMock = new Mock<ISolutionProvider>();
+        Mock<IDiagnosticProvider> _diagnosticProviderMock = new Mock<IDiagnosticProvider>();
+        Mock<IMapper> _mapperMock = new Mock<IMapper>();
         Mock<HttpFileCollectionBase> _filesMock = new Mock<HttpFileCollectionBase>();
         Mock<HttpRequestBase> _requestMock = new Mock<HttpRequestBase>();
         Mock<HttpContextBase> _contextMock = new Mock<HttpContextBase>();
-        Mock<HttpPostedFileBase> _normalFileMock = new Mock<HttpPostedFileBase>();
-        Mock<HttpPostedFileBase> _wrongExtensionFileMock = new Mock<HttpPostedFileBase>();
+        Mock<HttpPostedFileBase> _postedFileMock = new Mock<HttpPostedFileBase>();
+        Mock<SourceFileDTO> sourcesDTOMock = new Mock<SourceFileDTO>();
         MemoryStream _testStream = new MemoryStream();
-        Dictionary<string, string> _input;
-        string _diagnosticReport;
+        const string _FILE_NAME= "TestFile";
+
+        Dictionary<string, string> _expectedDictionary = new Dictionary<string, string> { ["TestFile.cs"] = "" };
+        List<SourceFileDTO> _mapedSources;
 
         HomeController _controllerUnderTest;
 
         [TestInitialize]
         public void Setup()
         {
-            //Setup input and output data
-            string text = @"
-new class A {
-    int a;
-}";
-            _input = new Dictionary<string, string>() { ["first"] = text };
-            _diagnosticReport = "Some message";
+            
+            _postedFileMock.Setup(f => f.FileName).Returns(_FILE_NAME + ".cs");
+            _postedFileMock.Setup(f => f.ToString()).Returns(_FILE_NAME);
+            _postedFileMock.Setup(f => f.InputStream).Returns(_testStream);
 
-            //Setup dependencies mocks default behaviour
-            _diagnosticServiceMock.Setup(
-                ds => ds.GetCompilationDiagnostic(It.IsAny<CSharpCompilation>())).Returns(new List<string>());
-
-            _solutionCreatorMock.Setup(
-                sc => sc.GetCompilation(It.IsAny<IEnumerable<SyntaxTree>>(), It.IsAny<string>())).Returns(It.IsAny<CSharpCompilation>());
-
-            _solutionCreatorMock.Setup(
-                sc => sc.GetSyntaxTrees(It.IsAny<Dictionary<string, string>>())).Returns(new List<SyntaxTree>());
-
-            //Setup HttpRequest mocks
-            string fileName = "TestFile";
-
-            _normalFileMock.Setup(f => f.FileName).Returns(fileName + ".cs");
-            _normalFileMock.Setup(f => f.ToString()).Returns("file1");
-            _normalFileMock.Setup(f => f.InputStream).Returns(_testStream);
-
-            _wrongExtensionFileMock.Setup(f => f.FileName).Returns(fileName + ".jar");
-            _wrongExtensionFileMock.Setup(f => f.ToString()).Returns("file2");
-            _wrongExtensionFileMock.Setup(f => f.InputStream).Returns(_testStream);
-
-            _filesMock.Setup(f => f.GetEnumerator()).Returns(new HttpPostedFileBase[] {_normalFileMock.Object, _wrongExtensionFileMock.Object }.GetEnumerator());
-            _filesMock.Setup(f => f.Count).Returns(2);
-            _filesMock.Setup(f => f["file1"]).Returns(_normalFileMock.Object);
-            _filesMock.Setup(f => f["file2"]).Returns(_wrongExtensionFileMock.Object);
+            _filesMock.SetupGet(
+                x => x.Count).Returns(1);
+            _filesMock.Setup(f => f.GetEnumerator())
+                .Returns(new HttpPostedFileBase[] { _postedFileMock.Object }.GetEnumerator());
+            _filesMock.Setup(f => f[_FILE_NAME]).Returns(_postedFileMock.Object);
 
             _requestMock.Setup(r => r.Files).Returns(_filesMock.Object);
             _contextMock.Setup(c => c.Request).Returns(_requestMock.Object);
 
-            //Setup tested controller
-            _controllerUnderTest = new HomeController(_diagnosticServiceMock.Object, _solutionCreatorMock.Object);
+            _mapedSources = new List<SourceFileDTO> { sourcesDTOMock.Object };
+            _mapperMock.Setup(
+                x => x.ToSourceFileDTO(_expectedDictionary)).Returns(_mapedSources);
+
+            _controllerUnderTest = new HomeController(_diagnosticProviderMock.Object, _mapperMock.Object);
             _controllerUnderTest.ControllerContext = new ControllerContext(_contextMock.Object, new RouteData(), _controllerUnderTest);
         }
 
         [TestCleanup]
         public void Clenup()
         {
-            _diagnosticServiceMock.Reset();
-            _solutionCreatorMock.Reset();
+            _diagnosticProviderMock.Reset();
+            _mapperMock.Reset();
             _filesMock.Reset();
+            _postedFileMock.Reset();
             _requestMock.Reset();
             _contextMock.Reset();
             _controllerUnderTest = null;
+            _mapedSources = null;
         }
 
         [TestMethod]
-        public void GetCompilationDiagnostic_InputNullArg_ThrowsArgNullException()
+        public void UploadAndReturnDiagnostic_InputNoMIMEFiles_Returns204StatusCodeWithNoFilesMessage()
         {
-            Action result = () => _controllerUnderTest.GetCompilationDiagnostic(null);
-
-            Assert.ThrowsException<ArgumentNullException>(result);
-        }
-
-        [TestMethod]
-        public void GetCompilationDiagnostic_DiagnosticServiceCausesNullResult_ThrowsNullReferenceExc()
-        {
-            _diagnosticServiceMock.Reset();
-            _diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(It.IsAny<CSharpCompilation>())).Returns<IEnumerable<string>>(null);
-
-            Action result = () => _controllerUnderTest.GetCompilationDiagnostic(new Dictionary<string, string>());
-
-            Assert.ThrowsException<NullReferenceException>(result);
-        }
-
-        [TestMethod]
-        public void GetCompilationDiagnostic_InputAnyDictionary_ReturnsAnyJsonResult()
-        {
-            var result = _controllerUnderTest.GetCompilationDiagnostic(new Dictionary<string, string>());
-
-            Assert.IsInstanceOfType(result, typeof(JsonResult));
-        }
-
-        [TestMethod]
-        public void GetCompilationDiagnostic_InputCertainDictionary_ReturnsDiagnostic()
-        {
-            SyntaxTree syntaxTree = Mock.Of<SyntaxTree>();
-            CSharpCompilation compilation = default(CSharpCompilation);
-            _solutionCreatorMock.Reset();
-            _diagnosticServiceMock.Reset();
-            _solutionCreatorMock.Setup(sc => sc.GetSyntaxTrees(_input)).Returns(new List<SyntaxTree>() { syntaxTree });
-            _solutionCreatorMock.Setup(sc => sc.GetCompilation(new List<SyntaxTree>() { syntaxTree }, It.IsAny<string>())).Returns(compilation);
-            _diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(compilation)).Returns(new List<string>() { _diagnosticReport });
-
-            var result = (List<string>) _controllerUnderTest.GetCompilationDiagnostic(_input).Data;
-
-            Assert.IsTrue(result.Contains(_diagnosticReport));
-        }
-
-        [TestMethod]
-        public void GetCompilationDiagnostic_InputNormalFiles_ReturnsJSONWithStringMessage()
-        {
-            Project project = new AdhocWorkspace().CurrentSolution.AddProject("TestName", "Name", LanguageNames.CSharp);
-
-            _solutionCreatorMock.Setup(
-                x => x.GetProject(_input, It.IsAny<string>())).Returns(project);
-            _diagnosticServiceMock.Setup(
-                x => x.GetCompilationDiagnostic(project, It.IsAny<ImmutableArray<DiagnosticAnalyzer>>()))
-                .Returns(new List<string>());
-
-            var result = (string) _controllerUnderTest.GetCompilationDiagnostic(_input).Data;
-
-            Assert.AreEqual(result, _controllerUnderTest.OkMessage);
-        }
-
-        [TestMethod]
-        public void GetCompilationDiagnostic_InputFilesWithWarnings_ReturnsListOfAnalyzersDiagnostic()
-        {
-    
-            Project project = new AdhocWorkspace().CurrentSolution.AddProject("TestName", "Name", LanguageNames.CSharp);
-
-            _solutionCreatorMock.Setup(
-                x => x.GetProject(_input, It.IsAny<string>())).Returns(project);
-            _diagnosticServiceMock.Setup(
-                x => x.GetCompilationDiagnostic(project, It.IsAny<ImmutableArray<DiagnosticAnalyzer>>()))
-                .Returns(new List<string>() { _diagnosticReport });
-
-            var result = (List<string>) _controllerUnderTest.GetCompilationDiagnostic(_input).Data;
-
-            Assert.IsTrue(result.Contains(_diagnosticReport));
-        }
-
-        [TestMethod]
-        public void Upload_InputEmptyRequest_Returns204StatusCode()
-        {
-            _filesMock.Reset();
-            _filesMock.Setup(f => f.Count).Returns(0);
-
-            var result = (HttpStatusCodeResult) _controllerUnderTest.Upload();
-
+            _filesMock.SetupGet(
+                x => x.Count).Returns(0);
+            var result = (HttpStatusCodeResult)_controllerUnderTest.UploadAndReturnDiagnostic();
             Assert.AreEqual(204, result.StatusCode);
+            Assert.AreEqual(_controllerUnderTest.NoFilesMessage, result.StatusDescription);
         }
 
         [TestMethod]
-        public void Upload_InputFileWithWrongExtension_Returns400StatusCode()
+        public void UploadAndReturnDiagnostic_InputFileWithWrongExtension_Returns400StatusCodeWithWrongExtensionMessage()
         {
-            var result = (HttpStatusCodeResult) _controllerUnderTest.Upload();
-
+            _postedFileMock.Reset();
+            _postedFileMock.Setup(f => f.FileName).Returns(_FILE_NAME + ".txt");
+            _postedFileMock.Setup(f => f.ToString()).Returns(_FILE_NAME);
+            var result = (HttpStatusCodeResult)_controllerUnderTest.UploadAndReturnDiagnostic();
             Assert.AreEqual(400, result.StatusCode);
+            Assert.AreEqual(_controllerUnderTest.WrongExtensionMessage, result.StatusDescription);
         }
 
         [TestMethod]
-        public void Upload_InputSources_ReturnsAnyJson()
+        [ExpectedException(typeof(NullReferenceException))]
+        public void UploadAndReturnDiagnostic_InputNullValueInFileCollection_ReturnsNullReferenceException()
         {
-            _wrongExtensionFileMock.Reset();
+            _filesMock.Setup(
+                x => x[It.IsAny<string>()]).Returns<HttpPostedFileBase>(null);
+            var result = (HttpStatusCodeResult)_controllerUnderTest.UploadAndReturnDiagnostic();
+        }
 
-            _wrongExtensionFileMock.Setup(f => f.FileName).Returns("AnotherTestFile" + ".cs");
-            _wrongExtensionFileMock.Setup(f => f.InputStream).Returns(new MemoryStream());
-            _wrongExtensionFileMock.Setup(f => f.ToString()).Returns("file2");
+        [TestMethod]
+        public void UploadAndReturnDiagnostic_DiagnosticAndMapperServicesCalls()
+        {
+            _controllerUnderTest.UploadAndReturnDiagnostic();
 
-            var result = _controllerUnderTest.Upload();
+            _mapperMock.VerifyAll();
+            _diagnosticProviderMock.Verify(
+                x => x.GetDiagnostic(_mapedSources,
+                AnalyzerProvider.Analyzers,
+                _controllerUnderTest.DefaultSpecification));
+        }
 
+        [TestMethod]
+        public void UploadAndReturnDiagnostic_ReturnsJsonMessageWhenDiagnosticCollectionIsEmpty()
+        {
+            _diagnosticProviderMock.Setup(
+                x => x.GetDiagnostic(_mapedSources,
+                AnalyzerProvider.Analyzers,
+                _controllerUnderTest.DefaultSpecification)).Returns(new List<ReportDTO>());
+            
+            var result = (JsonResult) _controllerUnderTest.UploadAndReturnDiagnostic();
+            
             Assert.IsInstanceOfType(result, typeof(JsonResult));
-
-            _wrongExtensionFileMock.Reset();
+            Assert.AreEqual(_controllerUnderTest.OkMessage, result.Data);
         }
 
         [TestMethod]
-        public void Upload_InputSourcesCausesNullReferenceException_ThrowsNullReferenceExeption()
+        public void UploadAndReturnDiagnostic_ReturnsPartialViewWhenDiagnosticCollectionNotEmpty()
         {
-            _diagnosticServiceMock.Reset();
-            _diagnosticServiceMock.Setup(ds => ds.GetCompilationDiagnostic(It.IsAny<CSharpCompilation>())).Returns<IEnumerable<string>>(null);
+            var expected = new List<ReportViewModel> { new ReportViewModel() };
 
-            _wrongExtensionFileMock.Reset();
+            _mapperMock.Reset();
+            _mapperMock.Setup(
+                x => x.ToSourceFileDTO(_expectedDictionary)).Returns(_mapedSources);
+            _mapperMock.Setup(
+                x => x.ToReportViewModel(It.IsAny<IEnumerable<ReportDTO>>()))
+                .Returns(expected);
 
-            _wrongExtensionFileMock.Setup(f => f.FileName).Returns("AnotherTestFile" + ".cs");
-            _wrongExtensionFileMock.Setup(f => f.InputStream).Returns(new MemoryStream());
-            _wrongExtensionFileMock.Setup(f => f.ToString()).Returns("file2");
+            _diagnosticProviderMock.Setup(
+                x => x.GetDiagnostic(_mapedSources,
+                AnalyzerProvider.Analyzers,
+                _controllerUnderTest.DefaultSpecification)).Returns(new List<ReportDTO> { new ReportDTO()});
 
-            Action result = () => _controllerUnderTest.Upload();
+            var result = (PartialViewResult) _controllerUnderTest.UploadAndReturnDiagnostic();
 
-            Assert.ThrowsException<NullReferenceException>(result);
+            Assert.AreEqual(expected, result.Model);
+        }
 
-            _wrongExtensionFileMock.Reset();
+        [TestMethod]
+        public void UploadAndReturnDiagnostic_InputCertainFile_ReturnsPartialViewWithCertainDiagnostic()
+        {
+            var expectedDiagnostic = new List<ReportDTO> { new ReportDTO() };
+            var expected = new List<ReportViewModel> { new ReportViewModel() };
+
+            _mapperMock.Reset();
+            _mapperMock.Setup(
+                x => x.ToSourceFileDTO(_expectedDictionary)).Returns(_mapedSources);
+            _mapperMock.Setup(
+                x => x.ToReportViewModel(expectedDiagnostic))
+                .Returns(expected);
+
+            _diagnosticProviderMock.Setup(
+                x => x.GetDiagnostic(_mapedSources,
+                AnalyzerProvider.Analyzers,
+                _controllerUnderTest.DefaultSpecification)).Returns(expectedDiagnostic);
+
+            var result = (PartialViewResult)_controllerUnderTest.UploadAndReturnDiagnostic();
+
+            Assert.AreEqual(expected, result.Model);
         }
 
         [TestMethod]

@@ -30,7 +30,7 @@ namespace CodeAnalysisService.Infrastructure
                 result.Add(new ReportViewModel
                 {
                     FileName = dto.FileName,
-                    Locatin = dto.Location,
+                    Location = dto.Location,
                     Severety = dto.Severety,
                     Message = dto.Message,
                     AnalyzerID = dto.AnalyzerID
