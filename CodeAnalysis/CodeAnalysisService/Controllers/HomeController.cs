@@ -16,7 +16,9 @@ namespace CodeAnalysisService.Controllers
 
         private readonly string DefaultCsHarpExtension = ".cs";
 
-        public string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
+        public  string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
+        public string NoFilesMessage { get { return "No files was received"; } }
+        public string WrongExtensionMessage { get { return "Some of files has not appropriate format"; } }
 
 
         public HomeController(IDiagnosticProvider diagnosticProvider, IMapper mapper)
@@ -34,7 +36,7 @@ namespace CodeAnalysisService.Controllers
         public ActionResult UploadAndReturnDiagnostic()
         {
             if (Request.Files.Count == 0)
-                return new HttpStatusCodeResult(HttpStatusCode.NoContent, "No files was received");
+                return new HttpStatusCodeResult(HttpStatusCode.NoContent, NoFilesMessage);
 
             Dictionary<string, string> normalFiles = new Dictionary<string, string>();
 
@@ -44,7 +46,7 @@ namespace CodeAnalysisService.Controllers
                 if (upload != null)
                 {
                     if (Path.GetExtension(upload.FileName) != DefaultCsHarpExtension)
-                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Some of files has not appropriate format");
+                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest, WrongExtensionMessage);
 
                     string fileName = Path.GetFileName(upload.FileName);
                     using (StreamReader streamReader = new StreamReader(upload.InputStream))
@@ -57,7 +59,8 @@ namespace CodeAnalysisService.Controllers
             if (normalFiles.Count > 0)
             {
                 var sourcesDTO = _mapper.ToSourceFileDTO(normalFiles);
-                var returnedDiagnostic = _diagnosticProvider.GetDiagnostic(sourcesDTO, AnalyzerProvider.Analyzers, new ExpressionSpecification(o => o.Severety != "Hidden"));
+                var returnedDiagnostic = _diagnosticProvider.GetDiagnostic(
+                    sourcesDTO, AnalyzerProvider.Analyzers, new ExpressionSpecification(o => o.Severety != "Hidden"));
                 if (returnedDiagnostic.Count() == 0)
                     return Json(OkMessage);
                 else
