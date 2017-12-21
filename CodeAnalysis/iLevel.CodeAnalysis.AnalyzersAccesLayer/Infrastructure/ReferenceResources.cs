@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using System.Linq;
 
-namespace iLevel.CodeAnalysis.BusinessLogicLayer.Infrastructure
+namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure
 {
     class ReferenceResources
     {

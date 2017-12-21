@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-
-namespace CodeAnalysisService
+namespace CodeAnalysisService.Infrastructure
 {
     public static class AnalyzerProvider
     {

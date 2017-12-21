@@ -1,6 +1,7 @@
-﻿using Unity;
-using System.Web.Mvc;
-using iLevel.CodeAnalysis.BusinessLogicLayer.Infrastructure;
+﻿using System.Web.Mvc;
+using AAL = iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure;
+using CodeAnalysisService.Infrastructure;
+using Unity;
 using Unity.Mvc5;
 
 namespace CodeAnalysisService
@@ -14,7 +15,8 @@ namespace CodeAnalysisService
         public static void RegisterServices()
         {
             _container = new UnityContainer();
-            ServiceRegistrator.RegisterServices(_container);
+            AAL.ServiceRegistrator.RegisterServices(_container);
+            _container.RegisterType<IMapper, Mapper>();
             DependencyResolver.SetResolver(new UnityDependencyResolver(_container));
         }
     }

@@ -1,0 +1,44 @@
+﻿@using CodeAnalysisService.Models
+@model IEnumerable<ReportViewModel>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.FileName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Locatin)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.AnalyzerID)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Message)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Severety)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.FileName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Locatin)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.AnalyzerID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Message)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Severety)
+        </td>
+    </tr>
+}
+
+</table>

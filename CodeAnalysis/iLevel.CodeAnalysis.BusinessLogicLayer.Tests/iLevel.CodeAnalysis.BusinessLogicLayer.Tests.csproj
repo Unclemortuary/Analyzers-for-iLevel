@@ -181,8 +181,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DiagnosticProviderTests.cs" />
-    <Compile Include="SolutionProviderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

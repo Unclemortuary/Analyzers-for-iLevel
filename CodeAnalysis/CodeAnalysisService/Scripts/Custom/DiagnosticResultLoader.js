@@ -8,7 +8,7 @@
         return new Promise(function (resolve, reject) {
             $.ajax({
                 type: "POST",
-                url: "Home/Upload",
+                url: "Home/UploadAndReturnDiagnostic",
                 contentType: false,
                 processData: false,
                 data: data,
@@ -30,9 +30,7 @@
             result.append('<div class="textResult">' + data + '</div>');
         }
         else {
-            for (var i = 0; i < data.length; i++) {
-                result.append('<div class="textResult">' + data[i] + '</div>');
-            }
+            result.html(data)
         }
     }
 

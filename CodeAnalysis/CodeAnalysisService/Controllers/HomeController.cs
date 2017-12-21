@@ -1,29 +1,30 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using System.Net;
 using System.IO;
-using iLevel.CodeAnalysis.BusinessLogicLayer.CommonInterfaces;
+using CodeAnalysisService.Infrastructure;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Specification;
+using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
 
 namespace CodeAnalysisService.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IDiagnosticProvider _diagnosticService;
-        private readonly ISolutionProvider _solutionCreator;
+        private readonly IDiagnosticProvider _diagnosticProvider;
+        private readonly IMapper _mapper;
 
         private readonly string DefaultCsHarpExtension = ".cs";
-        private readonly string DefaultAssemblyName = "ilevel";
 
-        public string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
+        public  string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
+        public string NoFilesMessage { get { return "No files was received"; } }
+        public string WrongExtensionMessage { get { return "Some of files has not appropriate format"; } }
 
 
-        public HomeController(IDiagnosticProvider diagnosticService, ISolutionProvider solutionCreator)
+        public HomeController(IDiagnosticProvider diagnosticProvider, IMapper mapper)
         {
-            _diagnosticService = diagnosticService;
-            _solutionCreator = solutionCreator;
+            _diagnosticProvider = diagnosticProvider;
+            _mapper = mapper;
         }
 
         public ActionResult Index()
@@ -32,10 +33,10 @@ namespace CodeAnalysisService.Controllers
         }
 
         [HttpPost]
-        public ActionResult Upload()
+        public ActionResult UploadAndReturnDiagnostic()
         {
             if (Request.Files.Count == 0)
-                return new HttpStatusCodeResult(HttpStatusCode.NoContent, "No files was received");
+                return new HttpStatusCodeResult(HttpStatusCode.NoContent, NoFilesMessage);
 
             Dictionary<string, string> normalFiles = new Dictionary<string, string>();
 
@@ -45,7 +46,7 @@ namespace CodeAnalysisService.Controllers
                 if (upload != null)
                 {
                     if (Path.GetExtension(upload.FileName) != DefaultCsHarpExtension)
-                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Some files has not appropriate format");
+                        return new HttpStatusCodeResult(HttpStatusCode.BadRequest, WrongExtensionMessage);
 
                     string fileName = Path.GetFileName(upload.FileName);
                     using (StreamReader streamReader = new StreamReader(upload.InputStream))
@@ -55,27 +56,18 @@ namespace CodeAnalysisService.Controllers
                     }
                 }
             }
-            var returnableMessage = GetCompilationDiagnostic(normalFiles);
-            return returnableMessage;
-        }
-
-        internal JsonResult GetCompilationDiagnostic(Dictionary<string, string> files)
-        {
-            files = files ?? throw new ArgumentNullException(nameof(files));
-            var compilation = _solutionCreator.GetCompilation(_solutionCreator.GetSyntaxTrees(files), DefaultAssemblyName);
-            var diagnostics = _diagnosticService.GetCompilationDiagnostic(compilation);
-            if (diagnostics == null)
-                throw new NullReferenceException();
-            if (diagnostics.Count() == 0)
+            if (normalFiles.Count > 0)
             {
-                var proj = _solutionCreator.GetProject(files);
-                var result = _diagnosticService.GetCompilationDiagnostic(proj, AnalyzerProvider.Analyzers.ToImmutableArray());
-                if (result.Count() == 0)
+                var sourcesDTO = _mapper.ToSourceFileDTO(normalFiles);
+                var returnedDiagnostic = _diagnosticProvider.GetDiagnostic(
+                    sourcesDTO, AnalyzerProvider.Analyzers, new ExpressionSpecification(o => o.Severety != "Hidden"));
+                if (returnedDiagnostic.Count() == 0)
                     return Json(OkMessage);
-                return Json(result);
+                else
+                    return PartialView("ReportPartial", _mapper.ToReportViewModel(returnedDiagnostic));
             }
             else
-                return Json(diagnostics);
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
         }
     }
 }

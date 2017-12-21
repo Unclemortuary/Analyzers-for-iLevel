@@ -288,7 +288,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\AnalyzerConfig.cs" />
-    <Compile Include="App_Start\AnalyzerProvider.cs" />
+    <Compile Include="Infrastructure\AnalyzerProvider.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -297,6 +297,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\Mapper.cs" />
+    <Compile Include="Models\ReportViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -306,6 +308,7 @@
     <Content Include="Views\web.config" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
+    <Content Include="Views\Home\ReportPartial.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -316,9 +319,12 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="CommonService\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\iLevel.CodeAnalysis.AnalyzersAccesLayer\iLevel.CodeAnalysis.AnalyzersAccesLayer.csproj">
+      <Project>{b7f84625-ed4c-4ed1-b913-afe8cb8063ff}</Project>
+      <Name>iLevel.CodeAnalysis.AnalyzersAccesLayer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj">
       <Project>{cba00023-e9b2-44ae-902e-3bf37a4703ae}</Project>
       <Name>iLevel.CodeAnalysis.BestPractices</Name>
