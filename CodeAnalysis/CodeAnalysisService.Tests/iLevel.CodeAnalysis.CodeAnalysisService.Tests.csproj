@@ -220,6 +220,10 @@
       <Project>{959a631d-10d7-4cb5-9881-7c3d4dc5bed0}</Project>
       <Name>iLevel.CodeAnalysis.CodeAnalysisService</Name>
     </ProjectReference>
+    <ProjectReference Include="..\iLevel.CodeAnalysis.AnalyzersAccesLayer\iLevel.CodeAnalysis.AnalyzersAccesLayer.csproj">
+      <Project>{b7f84625-ed4c-4ed1-b913-afe8cb8063ff}</Project>
+      <Name>iLevel.CodeAnalysis.AnalyzersAccesLayer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\iLevel.CodeAnalysis.BusinessLogicLayer\iLevel.CodeAnalysis.BusinessLogicLayer.csproj">
       <Project>{1b48a075-8a9e-4005-82c5-4132742ab25d}</Project>
       <Name>iLevel.CodeAnalysis.BusinessLogicLayer</Name>

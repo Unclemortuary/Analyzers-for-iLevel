@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using System.Net;
@@ -14,11 +15,15 @@ namespace CodeAnalysisService.Controllers
         private readonly IDiagnosticProvider _diagnosticProvider;
         private readonly IMapper _mapper;
 
+        private ExpressionSpecification _specification = new ExpressionSpecification(o => o.Severety != "Hidden");
+
         private readonly string DefaultCsHarpExtension = ".cs";
 
         public  string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
         public string NoFilesMessage { get { return "No files was received"; } }
         public string WrongExtensionMessage { get { return "Some of files has not appropriate format"; } }
+
+        public ExpressionSpecification DefaultSpecification => _specification;
 
 
         public HomeController(IDiagnosticProvider diagnosticProvider, IMapper mapper)
@@ -55,12 +60,15 @@ namespace CodeAnalysisService.Controllers
                         normalFiles.Add(fileName, text);
                     }
                 }
+                else
+                    throw new NullReferenceException(
+                        string.Format("Cant find file with name {0} in uploaded file collection", file.ToString()));
             }
             if (normalFiles.Count > 0)
             {
                 var sourcesDTO = _mapper.ToSourceFileDTO(normalFiles);
-                var returnedDiagnostic = _diagnosticProvider.GetDiagnostic(
-                    sourcesDTO, AnalyzerProvider.Analyzers, new ExpressionSpecification(o => o.Severety != "Hidden"));
+                var returnedDiagnostic = _diagnosticProvider
+                    .GetDiagnostic(sourcesDTO, AnalyzerProvider.Analyzers, DefaultSpecification);
                 if (returnedDiagnostic.Count() == 0)
                     return Json(OkMessage);
                 else
