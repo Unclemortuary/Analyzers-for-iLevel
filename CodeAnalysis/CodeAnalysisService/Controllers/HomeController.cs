@@ -72,7 +72,8 @@ namespace CodeAnalysisService.Controllers
                 if (returnedDiagnostic.Count() == 0)
                     return Json(OkMessage);
                 else
-                    return PartialView("ReportPartial", _mapper.ToReportViewModel(returnedDiagnostic));
+                    return PartialView("ReportPartial", 
+                        _mapper.ToReportViewModel(returnedDiagnostic.OrderBy(x => x.FileName)));
             }
             else
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);

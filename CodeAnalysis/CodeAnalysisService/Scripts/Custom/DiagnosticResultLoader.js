@@ -24,13 +24,16 @@
     }
 
     function formatResult(data) {
+        var header = $("#diagnosticHeader");
         var result = $(".results");
         result.empty();
         if (typeof data == 'string') {
+            header.append("Diagnostic results");
             result.append('<div class="textResult">' + data + '</div>');
         }
         else {
-            result.html(data)
+            header.append("Your solution is OK!");
+            result.html(data);
         }
     }
 

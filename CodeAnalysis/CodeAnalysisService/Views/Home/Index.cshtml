@@ -3,7 +3,7 @@
 }
 
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <!DOCTYPE html>
@@ -13,11 +13,9 @@
     <meta name="viewport" content="width=device-width" />
     <title>Index</title>
     <style type="text/css">
-        .wrapper {
-            max-width: 600px;
-            border: 1px solid green;
-            margin: 0 auto;
-        }
+        h3{
+            text-align:center;
+           }
 
         .formContainer {
             text-align: center;
@@ -26,6 +24,7 @@
 
         .userInput {
             padding-top: 5px;
+            position:center;
             text-align: center;
         }
 
@@ -44,21 +43,42 @@
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="formContainer">
-            <div class="userInput">
-                <input type="file" accept=".cs" multiple name="upload" id="uploadFiles" formenctype="multipart/form-data" /><br />
-            </div>
-            <div class="userInput">
-                <button id="submit">Submit and get diagnostic</button>
-            </div>
+    <div class="row"  style="padding-top: 50px">
+        <section class="col-md-4 col-md-push-4">
+            @using (Html.BeginForm())
+            {
+                <div class="well bs-component">
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12 col-md-push-2">
+                            <div class="form-group">
+                                <div class="userInput">
+                                    <input id="uploadFiles" type="file" accept=".cs" multiple name="upload" formenctype="multipart/form-data" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div>
+                                    <div>
+                                        <button id="submit">Submit and get diagnostic</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+    <div>
+        <div>
+            <h3 id="diagnosticHeader"></h3>
         </div>
-        <div class="wrapper">
-            <div class="results">
-            </div>
+        <div class="results">
         </div>
     </div>
+    
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
     <script src="~/Scripts/Custom/DiagnosticResultLoader.js"></script>
 </body>
 </html>
