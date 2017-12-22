@@ -10,6 +10,7 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure
         {
             container.RegisterType<ISyntaxFactory, CustomSyntaxFactory>();
             container.RegisterType<IDiagnosticProvider, DiagnosticProvider>();
+            container.RegisterType<IMapper, Mapper>();
         }
     }
 }

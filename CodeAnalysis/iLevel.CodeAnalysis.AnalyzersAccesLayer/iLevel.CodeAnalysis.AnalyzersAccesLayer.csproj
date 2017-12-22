@@ -173,6 +173,7 @@
     <Compile Include="Infrastructure\ReferenceResources.cs" />
     <Compile Include="Infrastructure\ServiceRegistrator.cs" />
     <Compile Include="Interfaces\IDiagnosticProvider.cs" />
+    <Compile Include="Interfaces\IMapper.cs" />
     <Compile Include="Interfaces\ISyntaxFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

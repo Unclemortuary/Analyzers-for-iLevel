@@ -15,7 +15,7 @@ namespace CodeAnalysisService.Controllers
         private readonly IDiagnosticProvider _diagnosticProvider;
         private readonly IMapper _mapper;
 
-        private ExpressionSpecification _specification = new ExpressionSpecification(o => o.Severety != "Hidden");
+        private ExpressionSpecification _specification = new ExpressionSpecification(o => o.Severety == "Warning");
 
         private readonly string DefaultCsHarpExtension = ".cs";
 

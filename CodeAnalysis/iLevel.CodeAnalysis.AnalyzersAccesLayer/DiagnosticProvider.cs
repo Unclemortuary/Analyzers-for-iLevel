@@ -12,15 +12,15 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer
     class DiagnosticProvider : IDiagnosticProvider
     {
         private readonly ISyntaxFactory _syntaxFactory;
-        private string _projectName = null;
-        private string _assemblyName = null;
+        private readonly IMapper _mapper;
 
-        public string ProjectName => _projectName ?? "iLevelProject";
-        public string AssemblyName => _assemblyName ?? "iLevel";
+        public string ProjectName => "iLevelProject";
+        public string AssemblyName => "iLevel";
 
-        public DiagnosticProvider(ISyntaxFactory syntaxFactory)
+        public DiagnosticProvider(ISyntaxFactory syntaxFactory, IMapper mapper)
         {
             _syntaxFactory = syntaxFactory;
+            _mapper = mapper;
         }
 
         public IEnumerable<ReportDTO> GetDiagnostic(IEnumerable<SourceFileDTO> sources, HashSet<DiagnosticAnalyzer> analyzers, ISpecification specification)
@@ -41,19 +41,7 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer
                 var compilationWithAnalyzers = _syntaxFactory.CreateCompilationWithAnalyzers(compilationWithoutAnalyzers, analyzers);
                 result = compilationWithAnalyzers.GetAllDiagnosticsAsync().Result.ToList();
             }
-            var dto = ToDTO(result.AsReadOnly());
-            return dto.Where(r => specification.IsStatisfiedBy(r)).ToList();
+            return _mapper.ToReportDTO(result.AsReadOnly()).Where(r => specification.IsStatisfiedBy(r)).ToList();
         }
-
-        internal IEnumerable<ReportDTO> ToDTO(IEnumerable<Diagnostic> diagnostic)
-        {
-            List<ReportDTO> result = new List<ReportDTO>();
-            foreach (var report in diagnostic)
-            {
-                result.Add(Mapper.Map(report));
-            }
-            return result;
-        }
-        
     }
 }
