@@ -1,32 +1,23 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
+using iLevel.CodeAnalysis.AnalyzersAccesLayerTests.Common;
 using iLevel.CodeAnalysis.BusinessLogicLayer.Specification;
 using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
-using Moq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Threading;
+using Moq;
+
 
 namespace iLevel.CodeAnalysis.AnalyzersAccesLayerTests
 {
-    public abstract class CustomSourceText : SourceText
-    {
-        public override char this[int position] => default(char);
-
-        public override Encoding Encoding => default(Encoding);
-
-        public override int Length => default(int);
-
-        public override void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
-    }
-
     [TestClass]
     public class DiagnosticProviderTests
     {
@@ -34,12 +25,6 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayerTests
         Mock<ISpecification> _specificationMock = new Mock<ISpecification>();
         Mock<IMapper> _mapperMock = new Mock<IMapper>();
         DiagnosticProvider _classUnderTest;
-
-        [TestInitialize]
-        public void Setup()
-        {
-
-        }
 
         [TestCleanup]
         public void Cleanup()
@@ -87,44 +72,40 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayerTests
         }
 
         [TestMethod]
-        public void GetDiagnosticTest_Input2Concrete()
+        public void GetDiagnosticTest_InputConcreteSourcesDTO_ServicesCallsWithConcreteParams()
         {
             string testText = @"
 class Test {
     public static void Main(string[] args) { }
 }";
-            var anyCompilation = CSharpCompilation.Create(It.IsAny<string>(), new List<SyntaxTree> { SyntaxFactory.ParseSyntaxTree(SourceText.From(testText)) });
-            var anyCompilationWithAnalyzers = anyCompilation.WithAnalyzers(new List<DiagnosticAnalyzer> { Mock.Of<DiagnosticAnalyzer>() }.ToImmutableArray());
+            var anyCompilation = CompilationCreater.CreateAnyCSharpCompilation(testText);
+            var anyCompilationWithAnalyzers = anyCompilation
+                .WithAnalyzers(new List<DiagnosticAnalyzer> { Mock.Of<DiagnosticAnalyzer>() }.ToImmutableArray());
             var inputAnalyzers = new HashSet<DiagnosticAnalyzer>();
             var inputDTO = new SourceFileDTO();
             var expectedDTO = new ReportDTO();
-            var sourceTextMock = new Mock<CustomSourceText>() { DefaultValue = DefaultValue.Empty };
+            CustomSourceText sourceTextMock = new CustomSourceText();
 
-            var test = sourceTextMock.Object;
+            _classUnderTest = new DiagnosticProvider(_syntaxFactory.Object, _mapperMock.Object);
 
             _syntaxFactory.Setup(
-                x => x.GetSourceText(inputDTO.Text, It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(sourceTextMock.Object);
+                x => x.GetSourceText(inputDTO.Text, It.IsAny<Encoding>(), It.IsAny<SourceHashAlgorithm>())).Returns(sourceTextMock);
             _syntaxFactory.Setup(
-                x => x.ParseSyntaxTree(sourceTextMock.Object, It.IsAny<ParseOptions>(), inputDTO.Name, It.IsAny<CancellationToken>()));
+                x => x.ParseSyntaxTree(sourceTextMock, It.IsAny<ParseOptions>(), inputDTO.Name, It.IsAny<CancellationToken>()));
             _syntaxFactory.Setup(
                 x => x.CreateCompilation(_classUnderTest.AssemblyName,
                 It.IsAny<IEnumerable<SyntaxTree>>(),
                 It.IsAny<IEnumerable<MetadataReference>>(),
                 It.IsAny<CSharpCompilationOptions>())).Returns(anyCompilation);
             _syntaxFactory.Setup(
-                x => x.CreateCompilationWithAnalyzers(anyCompilation, inputAnalyzers));
+                x => x.CreateCompilationWithAnalyzers(anyCompilation, inputAnalyzers)).Returns(anyCompilationWithAnalyzers);
 
             _mapperMock.Setup(
                 x => x.ToReportDTO(It.IsAny<IEnumerable<Diagnostic>>())).Returns(new List<ReportDTO> { expectedDTO });
 
-            _specificationMock.Setup(
-                x => x.IsStatisfiedBy(expectedDTO));
+            _specificationMock.Setup(x => x.IsStatisfiedBy(expectedDTO));
 
-            _classUnderTest = new DiagnosticProvider(_syntaxFactory.Object, _mapperMock.Object);
-
-            _classUnderTest.GetDiagnostic(new List<SourceFileDTO> { inputDTO },
-                inputAnalyzers,
-                _specificationMock.Object);
+            _classUnderTest.GetDiagnostic(new List<SourceFileDTO> { inputDTO }, inputAnalyzers, _specificationMock.Object);
 
             _syntaxFactory.VerifyAll();
             _specificationMock.VerifyAll();

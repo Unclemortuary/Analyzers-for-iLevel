@@ -318,7 +318,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="CommonService\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\iLevel.CodeAnalysis.AnalyzersAccesLayer\iLevel.CodeAnalysis.AnalyzersAccesLayer.csproj">

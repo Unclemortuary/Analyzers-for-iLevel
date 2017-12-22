@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Net;
 using System.IO;
-using CodeAnalysisService.Infrastructure;
+using WEB = CodeAnalysisService.Infrastructure;
 using iLevel.CodeAnalysis.BusinessLogicLayer.Specification;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
 
@@ -13,7 +13,7 @@ namespace CodeAnalysisService.Controllers
     public class HomeController : Controller
     {
         private readonly IDiagnosticProvider _diagnosticProvider;
-        private readonly IMapper _mapper;
+        private readonly WEB.IMapper _mapper;
 
         private ExpressionSpecification _specification = new ExpressionSpecification(o => o.Severety == "Warning");
 
@@ -26,7 +26,7 @@ namespace CodeAnalysisService.Controllers
         public ExpressionSpecification DefaultSpecification => _specification;
 
 
-        public HomeController(IDiagnosticProvider diagnosticProvider, IMapper mapper)
+        public HomeController(IDiagnosticProvider diagnosticProvider, WEB.IMapper mapper)
         {
             _diagnosticProvider = diagnosticProvider;
             _mapper = mapper;
@@ -68,7 +68,7 @@ namespace CodeAnalysisService.Controllers
             {
                 var sourcesDTO = _mapper.ToSourceFileDTO(normalFiles);
                 var returnedDiagnostic = _diagnosticProvider
-                    .GetDiagnostic(sourcesDTO, AnalyzerProvider.Analyzers, DefaultSpecification);
+                    .GetDiagnostic(sourcesDTO, WEB.AnalyzerProvider.Analyzers, DefaultSpecification);
                 if (returnedDiagnostic.Count() == 0)
                     return Json(OkMessage);
                 else

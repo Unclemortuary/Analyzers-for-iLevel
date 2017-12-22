@@ -181,6 +181,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\CompilationCreater.Helper.cs" />
+    <Compile Include="Common\CustomSourceText.cs" />
     <Compile Include="DiagnosticProviderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using iLevel.CodeAnalysis.BusinessLogicLayer.Specification;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
 using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
-using iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure;
 
 namespace iLevel.CodeAnalysis.AnalyzersAccesLayer
 {

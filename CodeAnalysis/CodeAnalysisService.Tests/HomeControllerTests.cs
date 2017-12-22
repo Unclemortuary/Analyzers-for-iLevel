@@ -5,7 +5,7 @@ using System.Web.Routing;
 using System.IO;
 using System.Collections.Generic;
 using CodeAnalysisService.Controllers;
-using CodeAnalysisService.Infrastructure;
+using WEB = CodeAnalysisService.Infrastructure;
 using CodeAnalysisService.Models;
 using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
 using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
@@ -18,7 +18,7 @@ namespace CodeAnalysisService.Tests
     public class HomeControllerTests
     {
         Mock<IDiagnosticProvider> _diagnosticProviderMock = new Mock<IDiagnosticProvider>();
-        Mock<IMapper> _mapperMock = new Mock<IMapper>();
+        Mock<WEB.IMapper> _mapperMock = new Mock<WEB.IMapper>();
         Mock<HttpFileCollectionBase> _filesMock = new Mock<HttpFileCollectionBase>();
         Mock<HttpRequestBase> _requestMock = new Mock<HttpRequestBase>();
         Mock<HttpContextBase> _contextMock = new Mock<HttpContextBase>();
@@ -108,7 +108,7 @@ namespace CodeAnalysisService.Tests
             _mapperMock.VerifyAll();
             _diagnosticProviderMock.Verify(
                 x => x.GetDiagnostic(_mapedSources,
-                AnalyzerProvider.Analyzers,
+                WEB.AnalyzerProvider.Analyzers,
                 _controllerUnderTest.DefaultSpecification));
         }
 
@@ -117,7 +117,7 @@ namespace CodeAnalysisService.Tests
         {
             _diagnosticProviderMock.Setup(
                 x => x.GetDiagnostic(_mapedSources,
-                AnalyzerProvider.Analyzers,
+                WEB.AnalyzerProvider.Analyzers,
                 _controllerUnderTest.DefaultSpecification)).Returns(new List<ReportDTO>());
             
             var result = (JsonResult) _controllerUnderTest.UploadAndReturnDiagnostic();
@@ -140,7 +140,7 @@ namespace CodeAnalysisService.Tests
 
             _diagnosticProviderMock.Setup(
                 x => x.GetDiagnostic(_mapedSources,
-                AnalyzerProvider.Analyzers,
+                WEB.AnalyzerProvider.Analyzers,
                 _controllerUnderTest.DefaultSpecification)).Returns(new List<ReportDTO> { new ReportDTO()});
 
             var result = (PartialViewResult) _controllerUnderTest.UploadAndReturnDiagnostic();
@@ -163,7 +163,7 @@ namespace CodeAnalysisService.Tests
 
             _diagnosticProviderMock.Setup(
                 x => x.GetDiagnostic(_mapedSources,
-                AnalyzerProvider.Analyzers,
+                WEB.AnalyzerProvider.Analyzers,
                 _controllerUnderTest.DefaultSpecification)).Returns(expectedDiagnostic);
 
             var result = (PartialViewResult)_controllerUnderTest.UploadAndReturnDiagnostic();
