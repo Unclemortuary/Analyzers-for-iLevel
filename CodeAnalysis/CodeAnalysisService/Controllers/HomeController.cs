@@ -15,16 +15,14 @@ namespace CodeAnalysisService.Controllers
         private readonly IDiagnosticProvider _diagnosticProvider;
         private readonly WEB.IMapper _mapper;
 
-        private ExpressionSpecification _specification = new ExpressionSpecification(o => o.Severety == "Warning");
+        //private ExpressionSpecification _specification = new ExpressionSpecification(o => o.Severety == "Warning");
 
         private readonly string DefaultCsHarpExtension = ".cs";
 
         public  string OkMessage { get { return "As a result of diagnostics no warnings were found in your files"; } }
         public string NoFilesMessage { get { return "No files was received"; } }
         public string WrongExtensionMessage { get { return "Some of files has not appropriate format"; } }
-
-        public ExpressionSpecification DefaultSpecification => _specification;
-
+        public ExpressionSpecification Specification { get; set; } = new ExpressionSpecification(o => o.Severety == "Warnign");
 
         public HomeController(IDiagnosticProvider diagnosticProvider, WEB.IMapper mapper)
         {
@@ -68,7 +66,7 @@ namespace CodeAnalysisService.Controllers
             {
                 var sourcesDTO = _mapper.ToSourceFileDTO(normalFiles);
                 var returnedDiagnostic = _diagnosticProvider
-                    .GetDiagnostic(sourcesDTO, WEB.AnalyzerProvider.Analyzers, DefaultSpecification);
+                    .GetDiagnostic(sourcesDTO, WEB.AnalyzerProvider.Analyzers, Specification);
                 if (returnedDiagnostic.Count() == 0)
                     return Json(OkMessage);
                 else

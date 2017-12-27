@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
+using System.Web.Routing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CodeAnalysisService;
+using CodeAnalysisService.Models;
 using CodeAnalysisService.Controllers;
 using CodeAnalysisService.Infrastructure;
+using iLevel.CodeAnalysis.BusinessLogicLayer.Specification;
 using iLevel.CodeAnalysis.ServiceIntegrationTests.Common;
 using Unity;
+using System.Linq;
 
 namespace iLevel.CodeAnalysis.ServiceIntegrationTests
 {
@@ -15,11 +19,13 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests
     {
         Dictionary<string, string> _input;
         HomeController _controllerUnderTest;
+        IEqualityComparer<ReportViewModel> testComparer = new ReportViewModelComparer();
 
         [TestInitialize]
         public void Setup()
         {
             UnityConfig.RegisterServices();
+            AnalyzerConfig.RegisterAnalyzers(AnalyzerProvider.Analyzers);
             _input = new Dictionary<string, string>();
             _controllerUnderTest = UnityConfig.Container.Resolve<HomeController>();
         }
@@ -55,8 +61,10 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests
         }
     }";
             _input.Add("Program", argumentUnderscoreTest);
-            var controller = UnityConfig.Container.Resolve<HomeController>();
-            controller.UploadAndReturnDiagnostic();
+            AnalyzerProvider.Analyzers.Clear();
+            var context = MIMEFIlesRequestMocker.CreateHttpContextMockWithFilesFromStringPairs(_input);
+            _controllerUnderTest.ControllerContext = new ControllerContext(context, new RouteData(), _controllerUnderTest);
+            _controllerUnderTest.UploadAndReturnDiagnostic();
         }
 
         [TestMethod]
@@ -69,13 +77,10 @@ class Program
     }
 ";
             _input.Add("Program", normalTest);
-
-            AnalyzerConfig.RegisterAnalyzers(AnalyzerProvider.Analyzers);
-
-            var controller = UnityConfig.Container.Resolve<HomeController>();
-            var httpResult = (HttpNotFoundResult)controller.UploadAndReturnDiagnostic();
-            var result = httpResult.StatusDescription;
-            Assert.AreEqual(controller.OkMessage, result);
+            var context = MIMEFIlesRequestMocker.CreateHttpContextMockWithFilesFromStringPairs(_input);
+            _controllerUnderTest.ControllerContext = new ControllerContext(context, new RouteData(), _controllerUnderTest);
+            var result = (JsonResult)_controllerUnderTest.UploadAndReturnDiagnostic();
+            Assert.AreEqual(_controllerUnderTest.OkMessage, result.Data);
         }
 
         [TestMethod]
@@ -89,20 +94,22 @@ class Program
 ";
             _input.Add("Program", argumentUnderscoreTest);
 
-            AnalyzerConfig.RegisterAnalyzers(AnalyzerProvider.Analyzers);
-
-            var controller = UnityConfig.Container.Resolve<HomeController>();
-            var resultJson = (JsonResult)controller.UploadAndReturnDiagnostic();
-            var resultList = (List<string>)resultJson.Data;
-            var result = resultList[0];
-            var expected = new ServiceDiagnosticResult()
+            
+            var context = MIMEFIlesRequestMocker.CreateHttpContextMockWithFilesFromStringPairs(_input);
+            _controllerUnderTest.ControllerContext = new ControllerContext(context, new RouteData(), _controllerUnderTest);
+            _controllerUnderTest.Specification = new ExpressionSpecification(o => o.Severety == "Error");
+            var result = (PartialViewResult)_controllerUnderTest.UploadAndReturnDiagnostic();
+            var expected = new ReportViewModel
             {
-                Location = { FileName = "", Line = null, Column = null },
-                SeveretyType = SeveretyType.error,
-                DiagnosticMessage = "Program does not contain a static 'Main' method suitable for an entry point",
-                AnalyzerID = ""
+                AnalyzerID = "CS5001",
+                FileName = "",
+                Location = "(0,0)",
+                Severety = "Error",
+                Message = "Program does not contain a static 'Main' method suitable for an entry point"
             };
-            ServiceDiagnosticVerifier.Verify(expected, result);
+            var resultCollection = (IEnumerable<ReportViewModel>)result.Model;
+            var resultReport = resultCollection.First();
+            Assert.IsTrue(resultCollection.Contains(expected, testComparer));
         }
 
         [TestMethod]
@@ -131,89 +138,97 @@ namespace SomeNamespace
             _input.Add("Class", classWithServiceMethodDeclaration);
             _input.Add("Program", classUsesService);
 
-            AnalyzerConfig.RegisterAnalyzers(AnalyzerProvider.Analyzers);
-
-            var controller = UnityConfig.Container.Resolve<HomeController>();
-            //var result = (List<string>)controller.GetCompilationDiagnostic(_input).Data;
-            var expected = new ServiceDiagnosticResult()
+            var context = MIMEFIlesRequestMocker.CreateHttpContextMockWithFilesFromStringPairs(_input);
+            _controllerUnderTest.Specification = new ExpressionSpecification(o => o.Severety == "Error");
+            _controllerUnderTest.ControllerContext = new ControllerContext(context, new RouteData(), _controllerUnderTest);
+            var result = (PartialViewResult)_controllerUnderTest.UploadAndReturnDiagnostic();
+            var resultCollection = (IEnumerable<ReportViewModel>)result.Model;
+            var expected = new ReportViewModel
             {
-                Location = { FileName = "Program", Line = 8, Column = 14 },
-                SeveretyType = SeveretyType.error,
-                DiagnosticMessage = "The type or namespace name 'Class1' could not be found (are you missing a using directive or an assembly reference?)",
-                AnalyzerID = ""
+                AnalyzerID = "CS0246",
+                FileName = "Program.cs",
+                Location = "(7,13)",
+                Severety = "Error",
+                Message = "The type or namespace name 'Class1' could not be found (are you missing a using directive or an assembly reference?)"
             };
-            //ServiceDiagnosticVerifier.Verify(expected, result[0]);
+            Assert.IsTrue(resultCollection.Contains(expected, testComparer));
         }
 
         [TestMethod]
         public void FilesWithArgumentNamesUnderscore_ReturnsWarningFromILVL0001Analyzer()
         {
             string argumentUnderscoreTest = @"
-    class Program
-    {
-        static void Main(string[] args___) { }
-    }
-";
+            class Program
+            {
+                static void Main(string[] args___) { }
+            }
+        ";
             _input.Add("Program", argumentUnderscoreTest);
 
-            AnalyzerConfig.RegisterAnalyzers(AnalyzerProvider.Analyzers);
+            var context = MIMEFIlesRequestMocker.CreateHttpContextMockWithFilesFromStringPairs(_input);
+            _controllerUnderTest.Specification = new ExpressionSpecification(o => o.Severety == "Warning");
+            _controllerUnderTest.ControllerContext = new ControllerContext(context, new RouteData(), _controllerUnderTest);
 
-            var controller = UnityConfig.Container.Resolve<HomeController>();
-            //var resultList = (List<string>) controller.GetCompilationDiagnostic(_input).Data;
-            //var result = resultList[0];
-            var expected = new ServiceDiagnosticResult()
+            var result = (PartialViewResult)_controllerUnderTest.UploadAndReturnDiagnostic();
+            var resultCollection = (IEnumerable<ReportViewModel>)result.Model;
+
+            var expected = new ReportViewModel
             {
-                Location = {FileName = "Program", Line = 4, Column = 26},
-                SeveretyType = SeveretyType.warning,
-                DiagnosticMessage = "Rename argument name",
-                AnalyzerID = "ILVL0001"
+                AnalyzerID = "ILVL0001",
+                FileName = "Program.cs",
+                Location = "(3,33)",
+                Severety = "Warning",
+                Message = "Rename argument name"
             };
-            //ServiceDiagnosticVerifier.Verify(expected, result);
+            Assert.IsTrue(resultCollection.Contains(expected, testComparer));
         }
 
         [TestMethod]
         public void FileUsesServiceInLoop_ReturnsWarningFromILVL0002Analyzer()
         {
             string service = @"
-namespace Service
-{
-    public interface ISomeService
-    {
-        void Method();
-    }
-}";
+        namespace Service
+        {
+            public interface ISomeService
+            {
+                void Method();
+            }
+        }";
 
             string serviceInLoopTest = @"
-using Service;
+        using Service;
 
-    class Program
-    {
-		static ISomeService service = null;
-		
-        static void Main(string[] args)
-        {
-            do
-			{
-				service.Method();
-			} while(true);
-        }
-    }";
+            class Program
+            {
+        		static ISomeService service = null;
+
+                static void Main(string[] args)
+                {
+                    do
+        			{
+        				service.Method();
+        			} while(true);
+                }
+            }";
             _input.Add("Service", service);
             _input.Add("Program", serviceInLoopTest);
 
-            AnalyzerConfig.RegisterAnalyzers(AnalyzerProvider.Analyzers);
+            var context = MIMEFIlesRequestMocker.CreateHttpContextMockWithFilesFromStringPairs(_input);
+            _controllerUnderTest.Specification = new ExpressionSpecification(o => o.Severety == "Warning");
+            _controllerUnderTest.ControllerContext = new ControllerContext(context, new RouteData(), _controllerUnderTest);
 
-            var controller = UnityConfig.Container.Resolve<HomeController>();
-            //var resultList = (List<string>)controller.GetCompilationDiagnostic(_input).Data;
-            //var result = resultList[0];
-            var expected = new ServiceDiagnosticResult()
+            var result = (PartialViewResult)_controllerUnderTest.UploadAndReturnDiagnostic();
+            var resultCollection = (IEnumerable<ReportViewModel>)result.Model;
+
+            var expected = new ReportViewModel
             {
-                Location = { FileName = "Program", Line = 12, Column = 17 },
-                SeveretyType = SeveretyType.warning,
-                DiagnosticMessage = "Service method shouldn't be executed in a loop because there is no guarantee that cache has initialized properly",
-                AnalyzerID = "ILVL0002"
+                AnalyzerID = "ILVL0002",
+                FileName = "Program.cs",
+                Location = "(11,17)",
+                Severety = "Warning",
+                Message = "Service method shouldn't be executed in a loop because there is no guarantee that cache has initialized properly"
             };
-            //ServiceDiagnosticVerifier.Verify(expected, result);
+            Assert.IsTrue(resultCollection.Contains(expected, testComparer));
         }
     }
 }

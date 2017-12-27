@@ -109,7 +109,7 @@ namespace CodeAnalysisService.Tests
             _diagnosticProviderMock.Verify(
                 x => x.GetDiagnostic(_mapedSources,
                 WEB.AnalyzerProvider.Analyzers,
-                _controllerUnderTest.DefaultSpecification));
+                _controllerUnderTest.Specification));
         }
 
         [TestMethod]
@@ -118,7 +118,7 @@ namespace CodeAnalysisService.Tests
             _diagnosticProviderMock.Setup(
                 x => x.GetDiagnostic(_mapedSources,
                 WEB.AnalyzerProvider.Analyzers,
-                _controllerUnderTest.DefaultSpecification)).Returns(new List<ReportDTO>());
+                _controllerUnderTest.Specification)).Returns(new List<ReportDTO>());
             
             var result = (JsonResult) _controllerUnderTest.UploadAndReturnDiagnostic();
             
@@ -141,7 +141,7 @@ namespace CodeAnalysisService.Tests
             _diagnosticProviderMock.Setup(
                 x => x.GetDiagnostic(_mapedSources,
                 WEB.AnalyzerProvider.Analyzers,
-                _controllerUnderTest.DefaultSpecification)).Returns(new List<ReportDTO> { new ReportDTO()});
+                _controllerUnderTest.Specification)).Returns(new List<ReportDTO> { new ReportDTO()});
 
             var result = (PartialViewResult) _controllerUnderTest.UploadAndReturnDiagnostic();
 
@@ -164,7 +164,7 @@ namespace CodeAnalysisService.Tests
             _diagnosticProviderMock.Setup(
                 x => x.GetDiagnostic(_mapedSources,
                 WEB.AnalyzerProvider.Analyzers,
-                _controllerUnderTest.DefaultSpecification)).Returns(expectedDiagnostic);
+                _controllerUnderTest.Specification)).Returns(expectedDiagnostic);
 
             var result = (PartialViewResult)_controllerUnderTest.UploadAndReturnDiagnostic();
 

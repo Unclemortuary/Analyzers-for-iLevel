@@ -18,9 +18,9 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests.Common
             foreach (var pair in stringPairs)
             {
                 Mock<HttpPostedFileBase> postedFileMock = new Mock<HttpPostedFileBase>();
-                postedFileMock.SetupGet(f => f.FileName).Returns(pair.Key + ".cs");
-                postedFileMock.SetupGet(f => f.ToString()).Returns(pair.Key);
-                postedFileMock.SetupGet(f => f.InputStream).Returns(CreateStreamFromString(pair.Value));
+                postedFileMock.Setup(f => f.FileName).Returns(pair.Key + ".cs");
+                postedFileMock.Setup(f => f.ToString()).Returns(pair.Key);
+                postedFileMock.Setup(f => f.InputStream).Returns(CreateStreamFromString(pair.Value));
                 postedFiles.Add(postedFileMock.Object);
                 filesMock.Setup(f => f[pair.Key]).Returns(postedFileMock.Object);
             }
@@ -39,14 +39,12 @@ namespace iLevel.CodeAnalysis.ServiceIntegrationTests.Common
 
         public static Stream CreateStreamFromString(string text)
         {
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                StreamWriter writer = new StreamWriter(memoryStream);
-                writer.Write(text);
-                writer.Flush();
-                memoryStream.Position = 0;
-                return memoryStream;
-            }
+            MemoryStream memoryStream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(memoryStream);
+            writer.Write(text);
+            writer.Flush();
+            memoryStream.Position = 0;
+            return memoryStream;
         }
     }
 }

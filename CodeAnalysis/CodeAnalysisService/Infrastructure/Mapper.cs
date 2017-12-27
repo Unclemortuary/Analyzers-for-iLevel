@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
 using CodeAnalysisService.Models;
+using System;
 
 namespace CodeAnalysisService.Infrastructure
 {
@@ -30,7 +31,7 @@ namespace CodeAnalysisService.Infrastructure
                 result.Add(new ReportViewModel
                 {
                     FileName = dto.FileName,
-                    Location = dto.Location,
+                    Location = String.Format("({0},{1})", dto.Location.Line, dto.Location.Column),
                     Severety = dto.Severety,
                     Message = dto.Message,
                     AnalyzerID = dto.AnalyzerID

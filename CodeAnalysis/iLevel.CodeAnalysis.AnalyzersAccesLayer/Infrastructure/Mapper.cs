@@ -1,5 +1,5 @@
 ﻿using iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces;
-using iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
+using DTO = iLevel.CodeAnalysis.BusinessLogicLayer.DTO;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
@@ -7,9 +7,9 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure
 {
     class Mapper : IMapper
     {
-        public IEnumerable<ReportDTO> ToReportDTO(IEnumerable<Diagnostic> diagnostic)
+        public IEnumerable<DTO.ReportDTO> ToReportDTO(IEnumerable<Diagnostic> diagnostic)
         {
-            List<ReportDTO> result = new List<ReportDTO>();
+            List<DTO.ReportDTO> result = new List<DTO.ReportDTO>();
             foreach (var report in diagnostic)
             {
                 result.Add(Map(report));
@@ -17,11 +17,13 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Infrastructure
             return result;
         }
 
-        private ReportDTO Map(Diagnostic diagnostic)
+        private DTO.ReportDTO Map(Diagnostic diagnostic)
         {
-            ReportDTO report = new ReportDTO();
+            DTO.ReportDTO report = new DTO.ReportDTO();
             report.FileName = diagnostic?.Location?.SourceTree?.FilePath ?? "";
-            report.Location = diagnostic?.Location?.SourceSpan.ToString() ?? "";
+            report.Location = new DTO.Location {
+                Line = diagnostic.Location.GetLineSpan().StartLinePosition.Line,
+                Column = diagnostic.Location.GetLineSpan().StartLinePosition.Character };
             report.Severety = diagnostic.Severity.ToString();
             report.AnalyzerID = diagnostic.Id;
             report.Message = diagnostic.GetMessage();
