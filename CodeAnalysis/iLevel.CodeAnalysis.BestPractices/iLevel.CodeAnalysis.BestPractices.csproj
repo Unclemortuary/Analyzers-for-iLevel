@@ -2,6 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>iLevel.CodeAnalysis.BestPractices</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Aleksandr Kugushev</Authors>
+    <Description>A set of useful analysers that can be applicable for ilevel project</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePkgDefFile>false</GeneratePkgDefFile>
+    <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <ImportVSSDKTargets>true</ImportVSSDKTargets>
+    <PublishOutputToSymStore>false</PublishOutputToSymStore>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard2.0\iLevel.CodeAnalysis.BestPractices.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
