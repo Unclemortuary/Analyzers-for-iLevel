@@ -23,8 +23,10 @@ namespace iLevel.ViewPoint.CodeAnalysis.BestPractices
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, "Ugly argument name", "Rename argument name", "iLevel.BestPractices", DiagnosticSeverity.Warning, true);
 
+        ///
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
+        ///
         public override void Initialize(AnalysisContext context)
         {
             context.RegisterSyntaxNodeAction(Do, SyntaxKind.Parameter);
