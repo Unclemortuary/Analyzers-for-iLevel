@@ -33,8 +33,10 @@ namespace iLevel.CodeAnalysis.BestPractices
             "Service method shouldn't be executed in a loop because there is no guarantee that cache has initialized properly",
             "iLevel.BestPractices", DiagnosticSeverity.Warning, true);
 
+        ///
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
+        ///
         public override void Initialize(AnalysisContext context)
         {
             context.RegisterSyntaxNodeAction(Do, SyntaxKind.InvocationExpression);

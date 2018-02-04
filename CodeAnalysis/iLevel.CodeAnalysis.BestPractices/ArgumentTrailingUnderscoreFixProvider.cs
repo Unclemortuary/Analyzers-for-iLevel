@@ -23,8 +23,10 @@ namespace iLevel.ViewPoint.CodeAnalysis.BestPractices
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ArgumentTrailingUnderscoreFixProvider)), Shared]
     public class ArgumentTrailingUnderscoreFixProvider : CodeFixProvider
     {
+        ///
         public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(ArgumentTrailingUnderscoreAnalyzer.DiagnosticId);
 
+        ///
         public override async Task RegisterCodeFixesAsync(CodeFixContext context)
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
