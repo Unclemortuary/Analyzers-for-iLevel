@@ -35,7 +35,9 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer
 
             var compilationWithoutAnalyzers = _syntaxFactory.CreateCompilation(AssemblyName, syntaxTrees);
             result = compilationWithoutAnalyzers.GetDiagnostics().ToList();
-            if (result.Count == 0)
+
+            var errorDiagnostics = result.Where(r => r.Severity == DiagnosticSeverity.Error).ToList();
+            if (errorDiagnostics.Count == 0)
             {
                 var compilationWithAnalyzers = _syntaxFactory.CreateCompilationWithAnalyzers(compilationWithoutAnalyzers, analyzers);
                 result = compilationWithAnalyzers.GetAllDiagnosticsAsync().Result.ToList();

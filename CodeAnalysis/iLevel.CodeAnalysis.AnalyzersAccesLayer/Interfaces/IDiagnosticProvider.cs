@@ -8,6 +8,8 @@ namespace iLevel.CodeAnalysis.AnalyzersAccesLayer.Interfaces
     public interface IDiagnosticProvider
     {
         IEnumerable<ReportDTO> GetDiagnostic(
-            IEnumerable<SourceFileDTO> sources, HashSet<DiagnosticAnalyzer> analyzers, ISpecification specification);
+            IEnumerable<SourceFileDTO> sources,
+            HashSet<DiagnosticAnalyzer> analyzers,
+            ISpecification specification);
     }
 }
