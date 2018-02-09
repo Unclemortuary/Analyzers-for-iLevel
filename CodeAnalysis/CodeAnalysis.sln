@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.BestPractices", "iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj", "{CBA00023-E9B2-44AE-902E-3BF37A4703AE}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.AnalyzersAccesLayer", "iLevel.CodeAnalysis.AnalyzersAccesLayer\iLevel.CodeAnalysis.AnalyzersAccesLayer.csproj", "{B7F84625-ED4C-4ED1-B913-AFE8CB8063FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.AnalyzersAccesLayerTests", "iLevel.CodeAnalysis.AnalyzersAccesLayerTests\iLevel.CodeAnalysis.AnalyzersAccesLayerTests.csproj", "{9E68BCD5-CC10-4CF1-990E-46AE85DD3874}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,6 +74,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D3502BC4-84E5-41A7-A146-2571D6CF382F} = {DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}
+		{64CA75EA-1977-4F43-8B44-BAEB23F63C28} = {DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}
+		{765FD111-8075-420E-A3C1-3848CA4F868A} = {DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}
+		{9E68BCD5-CC10-4CF1-990E-46AE85DD3874} = {DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F85AF74-B258-4AF6-8FFF-2C1DCC69FD68}
