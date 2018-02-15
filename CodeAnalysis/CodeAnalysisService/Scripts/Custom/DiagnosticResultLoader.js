@@ -4,6 +4,40 @@
         $("#submit").on("click", postSources);
     });
 
+    function asincPost(data) {
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                type: "POST",
+                url: "Home/UploadAndReturnDiagnostic",
+                contentType: false,
+                processData: false,
+                data: data,
+
+                success: function (responce) {
+                    resolve(responce);
+                },
+                error: function (text) {
+                    reject(text);
+                }
+            });
+        });
+    }
+
+    function formatResult(data) {
+        var header = $("#diagnosticHeader");
+        var result = $(".results");
+        result.empty();
+        header.empty();
+        if (typeof data == 'string') {
+            header.append("Diagnostic results");
+            result.append('<div class="textResult">' + data + '</div>');
+        }
+        else {
+            header.append("Your solution is OK!");
+            result.html(data);
+        }
+    }
+
 
     function postSources(e) {
         e.preventDefault();
@@ -14,36 +48,10 @@
                 for (var x = 0; x < files.length; x++) {
                     data.append("file" + x, files[x]);
                 }
-
-                $.ajax({
-                    type: "POST",
-                    url: 'home/upload',
-                    contentType: false,
-                    processData: false,
-                    data: data,
-
-                    statusCode: {
-                        400: function (message) {
-                            alert(message);
-                        }
-                    },
-                    success: function (data, textStatus, xhr) {
-                        var result = $(".results");
-                        result.empty();
-                        if (typeof data == 'string') {
-                            result.append('<div class="textResult">' + data + '</div>');
-                        }
-                        else {
-                            for (var i = 0; i < data.length; i++) {
-                                result.append('<div class="textResult">' + data[i] + '</div>');
-                            }
-                        }
-
-                    },
-                    error: function (xhr, status, p3) {
-                        alert(p3);
-                    }
-                });
+                asincPost(data).then(
+                    result => { formatResult(result); },
+                    error => { alert(error); }
+                );
             } else {
                 alert("Browser does not support upploading HTML5 files");
             }
