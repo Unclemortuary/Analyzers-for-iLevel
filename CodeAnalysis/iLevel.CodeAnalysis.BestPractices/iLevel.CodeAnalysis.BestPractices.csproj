@@ -13,10 +13,8 @@
     <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
     <ImportVSSDKTargets>true</ImportVSSDKTargets>
     <PublishOutputToSymStore>false</PublishOutputToSymStore>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.0\iLevel.CodeAnalysis.BestPractices.xml</DocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <NuspecFile>..\NuGet utils\iLevel.CodeAnalysis.BestPractices.1.0.0.nuspec</NuspecFile>
   </PropertyGroup>
 
   <ItemGroup>
