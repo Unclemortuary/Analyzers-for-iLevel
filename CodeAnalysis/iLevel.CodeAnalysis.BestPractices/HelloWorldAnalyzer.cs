@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace HelloWorldAnalyzer
+namespace iLevel.CodeAnalysis.BestPractices
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class HelloWorldAnalyzer : DiagnosticAnalyzer
@@ -29,10 +29,10 @@ namespace HelloWorldAnalyzer
             if (context.Node is InvocationExpressionSyntax invocation &&
                 invocation.ArgumentList.Arguments.Count == 0)
             {
-                var symbol = context.SemanticModel.GetSymbolInfo(invocation).Symbol as IMethodSymbol;
-                if (symbol?.Name == "WriteLine" &&
-                    symbol?.ContainingSymbol.Name == "Console" &&
-                    symbol?.ContainingNamespace.Name == "System")
+                var symbol = context.SemanticModel.GetSymbolInfo(invocation);
+                if (symbol.Symbol?.Name == "WriteLine" &&
+                    symbol.Symbol?.ContainingSymbol.Name == "Console" &&
+                    symbol.Symbol?.ContainingNamespace.Name == "System")
                 {
                     context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation()));
                 }

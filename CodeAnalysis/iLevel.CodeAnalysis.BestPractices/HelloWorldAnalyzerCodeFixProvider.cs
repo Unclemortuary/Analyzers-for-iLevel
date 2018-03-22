@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace HelloWorldAnalyzer
+namespace iLevel.CodeAnalysis.BestPractices
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(HelloWorldAnalyzerCodeFixProvider)), Shared]
     public class HelloWorldAnalyzerCodeFixProvider : CodeFixProvider

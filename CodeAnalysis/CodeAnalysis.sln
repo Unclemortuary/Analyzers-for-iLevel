@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.BestPractices", "iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj", "{CBA00023-E9B2-44AE-902E-3BF37A4703AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iLevel.CodeAnalysis.BestPractices", "iLevel.CodeAnalysis.BestPractices\iLevel.CodeAnalysis.BestPractices.csproj", "{CBA00023-E9B2-44AE-902E-3BF37A4703AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iLevel.CodeAnalysis.BestPractices.Tests", "iLevel.CodeAnalysis.BestPractices.Tests\iLevel.CodeAnalysis.BestPractices.Tests.csproj", "{5D44FCF1-0E9E-4970-84E2-664D3D4E51AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iLevel.CodeAnalysis.BestPractices.Tests", "iLevel.CodeAnalysis.BestPractices.Tests\iLevel.CodeAnalysis.BestPractices.Tests.csproj", "{5D44FCF1-0E9E-4970-84E2-664D3D4E51AE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iLevel.CodeAnalysis.DataQueryTool", "iLevel.CodeAnalysis.DataQueryTool\iLevel.CodeAnalysis.DataQueryTool.csproj", "{CDAFBB31-FDB1-429B-829C-A765F2D5B088}"
 EndProject
@@ -76,6 +76,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{5D44FCF1-0E9E-4970-84E2-664D3D4E51AE} = {DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}
 		{D3502BC4-84E5-41A7-A146-2571D6CF382F} = {DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}
 		{64CA75EA-1977-4F43-8B44-BAEB23F63C28} = {DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}
 		{765FD111-8075-420E-A3C1-3848CA4F868A} = {DD2230B8-CF45-44FE-BA6C-AB6B16D51B9B}
