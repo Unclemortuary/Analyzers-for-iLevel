@@ -40,9 +40,10 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// </summary>
         /// <param name="source">A class in the form of a string to run the analyzer on</param>
         /// <param name="expected"> DiagnosticResults that should appear after the analyzer is run on the source</param>
-        protected void VerifyCSharpDiagnostic(string source, params DiagnosticResult[] expected)
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
+        protected void VerifyCSharpDiagnostic(string source, IEnumerable<string> additionalAssemblies = null, params DiagnosticResult[] expected)
         {
-            VerifyDiagnostics(new[] { source }, LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), expected);
+            VerifyDiagnostics(new[] { source }, LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), additionalAssemblies, expected);
         }
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the source</param>
         protected void VerifyBasicDiagnostic(string source, params DiagnosticResult[] expected)
         {
-            VerifyDiagnostics(new[] { source }, LanguageNames.VisualBasic, GetBasicDiagnosticAnalyzer(), expected);
+            VerifyDiagnostics(new[] { source }, LanguageNames.VisualBasic, GetBasicDiagnosticAnalyzer(), null, expected);
         }
 
         /// <summary>
@@ -62,9 +63,10 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// </summary>
         /// <param name="sources">An array of strings to create source documents from to run the analyzers on</param>
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the sources</param>
-        protected void VerifyCSharpDiagnostic(string[] sources, params DiagnosticResult[] expected)
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
+        protected void VerifyCSharpDiagnostic(string[] sources, IEnumerable<string> additionalAssemblies = null, params DiagnosticResult[] expected)
         {
-            VerifyDiagnostics(sources, LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), expected);
+            VerifyDiagnostics(sources, LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), additionalAssemblies, expected);
         }
 
         /// <summary>
@@ -75,7 +77,7 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the sources</param>
         protected void VerifyBasicDiagnostic(string[] sources, params DiagnosticResult[] expected)
         {
-            VerifyDiagnostics(sources, LanguageNames.VisualBasic, GetBasicDiagnosticAnalyzer(), expected);
+            VerifyDiagnostics(sources, LanguageNames.VisualBasic, GetBasicDiagnosticAnalyzer(), null, expected);
         }
 
         /// <summary>
@@ -86,9 +88,10 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// <param name="language">The language of the classes represented by the source strings</param>
         /// <param name="analyzer">The analyzer to be run on the source code</param>
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the sources</param>
-        private void VerifyDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer, params DiagnosticResult[] expected)
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
+        private void VerifyDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer, IEnumerable<string> additionalAssemblies = null, params DiagnosticResult[] expected)
         {
-            var diagnostics = GetSortedDiagnostics(sources, language, analyzer);
+            var diagnostics = GetSortedDiagnostics(sources, language, analyzer, additionalAssemblies);
             VerifyDiagnosticResults(diagnostics, analyzer, expected);
         }
 

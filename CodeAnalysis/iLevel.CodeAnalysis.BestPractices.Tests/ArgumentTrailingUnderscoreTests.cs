@@ -33,7 +33,7 @@ class Class
                 Locations = new[] { new DiagnosticResultLocation("Test0.cs", 4, 24) }
             };
 
-            VerifyCSharpDiagnostic(test, expected);
+            VerifyCSharpDiagnostic(test, null, expected);
 
             const string fixtest = @"
 class Class

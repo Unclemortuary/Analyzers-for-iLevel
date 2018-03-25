@@ -68,7 +68,7 @@ class Program
         }        
     }
 }";
-            VerifyCSharpDiagnostic(GetFilesBatch(test), GetDiagnosticResult(9, 13));
+            VerifyCSharpDiagnostic(GetFilesBatch(test), null, GetDiagnosticResult(9, 13));
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@ class Program
         }        
     }
 }";
-            VerifyCSharpDiagnostic(GetFilesBatch(test), GetDiagnosticResult(9, 13));
+            VerifyCSharpDiagnostic(GetFilesBatch(test), null, GetDiagnosticResult(9, 13));
         }
 
         [TestMethod]
@@ -104,7 +104,7 @@ class Program
         }        
     }
 }";
-            VerifyCSharpDiagnostic(GetFilesBatch(test), GetDiagnosticResult(9, 13));
+            VerifyCSharpDiagnostic(GetFilesBatch(test), null, GetDiagnosticResult(9, 13));
         }
 
         [TestMethod]
@@ -122,7 +122,7 @@ class Program
         } while(true);       
     }
 }";
-            VerifyCSharpDiagnostic(GetFilesBatch(test), GetDiagnosticResult(9, 13));
+            VerifyCSharpDiagnostic(GetFilesBatch(test), null, GetDiagnosticResult(9, 13));
         }
 
         private static string[] GetFilesBatch(string test) => new[] { ServiceClass, NotServiceClass, test };

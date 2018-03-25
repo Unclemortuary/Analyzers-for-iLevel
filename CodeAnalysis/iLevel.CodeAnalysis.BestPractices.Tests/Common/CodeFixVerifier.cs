@@ -41,9 +41,10 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// <param name="newSource">A class in the form of a string after the CodeFix was applied to it</param>
         /// <param name="codeFixIndex">Index determining which codefix to apply if there are multiple</param>
         /// <param name="allowNewCompilerDiagnostics">A bool controlling whether or not the test will fail if the CodeFix introduces other warnings after being applied</param>
-        protected void VerifyCSharpFix(string oldSource, string newSource, int? codeFixIndex = null, bool allowNewCompilerDiagnostics = false)
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
+        protected void VerifyCSharpFix(string oldSource, string newSource, int? codeFixIndex = null, bool allowNewCompilerDiagnostics = false, IEnumerable<string> additionalAssemblies = null)
         {
-            VerifyFix(LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), GetCSharpCodeFixProvider(), oldSource, newSource, codeFixIndex, allowNewCompilerDiagnostics);
+            VerifyFix(LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), GetCSharpCodeFixProvider(), oldSource, newSource, codeFixIndex, allowNewCompilerDiagnostics, additionalAssemblies);
         }
 
         /// <summary>
@@ -71,9 +72,10 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// <param name="newSource">A class in the form of a string after the CodeFix was applied to it</param>
         /// <param name="codeFixIndex">Index determining which codefix to apply if there are multiple</param>
         /// <param name="allowNewCompilerDiagnostics">A bool controlling whether or not the test will fail if the CodeFix introduces other warnings after being applied</param>
-        private void VerifyFix(string language, DiagnosticAnalyzer analyzer, CodeFixProvider codeFixProvider, string oldSource, string newSource, int? codeFixIndex, bool allowNewCompilerDiagnostics)
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
+        private void VerifyFix(string language, DiagnosticAnalyzer analyzer, CodeFixProvider codeFixProvider, string oldSource, string newSource, int? codeFixIndex, bool allowNewCompilerDiagnostics, IEnumerable<string> additionalAssemblies = null)
         {
-            var document = CreateDocument(oldSource, language);
+            var document = CreateDocument(oldSource, language, additionalAssemblies);
             var analyzerDiagnostics = GetSortedDiagnosticsFromDocuments(analyzer, new[] { document });
             var compilerDiagnostics = GetCompilerDiagnostics(document);
             var attempts = analyzerDiagnostics.Length;
