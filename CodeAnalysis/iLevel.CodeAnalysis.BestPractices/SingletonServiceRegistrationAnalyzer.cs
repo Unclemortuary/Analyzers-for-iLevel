@@ -15,18 +15,62 @@ namespace iLevel.CodeAnalysis.BestPractices
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class SingletonServiceRegistrationAnalyzer : DiagnosticAnalyzer
     {
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => throw new NotImplementedException();
+        public const string DiagnosticId = "ILVL0003";
+
+        private static readonly LocalizableString Title = "Singleton service registered in wrong way";
+        private static readonly LocalizableString MessageFormat = "Singleton service must be registered throught the method \"AddSingleton\" in order to avoid possible perfomance reducing";
+        private const string Category = "iLevel.BestPractises";
+
+        private const string NeededNamespace = "Microsoft.Extensions.DependencyInjection.IServiceCollection";
+
+        private static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true);
+
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
 
         public override void Initialize(AnalysisContext context)
         {
-            throw new NotImplementedException();
+            context.RegisterSyntaxNodeAction(Do, SyntaxKind.InvocationExpression);
+        }
+
+        private void Do(SyntaxNodeAnalysisContext ctx)
+        {
+            if (ctx.Node is InvocationExpressionSyntax invocation)
+            {
+                var memberSymbol = ctx.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
+                if (memberSymbol != null && memberSymbol.ToString().StartsWith(NeededNamespace))
+                {
+                    if (invocation.ArgumentList.Arguments.Count > 0)
+                    {
+                        var typeArgument = invocation.ArgumentList.Arguments.First();
+                        if (typeArgument.Expression is ObjectCreationExpressionSyntax objectCreation)
+                        {
+                            //TODO : check type of created object;
+                        }
+                        else
+                        {
+                            var expressionFromArgument = typeArgument.Expression;
+
+                            var typeInfo = ctx.SemanticModel.GetTypeInfo(expressionFromArgument); //Maybe should extract the method for reuse
+
+                            if (typeInfo.Type?.ToString().EndsWith("Singleton") ?? false)
+                            {
+                                //TODO : check the MethodExpression name
+                                ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                            }
+                        }
+                    }
+                    else //TODO : check if we works with generic overload
+                    {
+
+                    }
+                }
+            }
         }
     }
 
     //TODO:
-    //1) - check that invokationExpression is an IServiceCollection method
-    //2) - check that the parameter is ends with "Singleton"
-    //3) - do the same for the generic parameter
-    //4) - check that method symbol name is a AddSingleton, if not - create a rule
-    //5) - figure out how to handle overloads with Func
+    
+    
+    //3) - check that method symbol name is a AddSingleton, if not - create a rule
+    //4) - do the same for the generic parameter
 }
