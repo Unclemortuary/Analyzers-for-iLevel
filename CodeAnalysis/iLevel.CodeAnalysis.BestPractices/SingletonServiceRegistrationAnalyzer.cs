@@ -36,32 +36,31 @@ namespace iLevel.CodeAnalysis.BestPractices
         {
             if (ctx.Node is InvocationExpressionSyntax invocation)
             {
-                var memberSymbol = ctx.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-                if (memberSymbol != null && memberSymbol.ToString().StartsWith(NeededNamespace))
+                var memberAccessExpression = invocation.Expression as MemberAccessExpressionSyntax;
+                if (memberAccessExpression.Name.ToString().StartsWith("Add"))
                 {
-                    if (invocation.ArgumentList.Arguments.Count > 0)
+                    var memberSymbol = ctx.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
+                    if (memberSymbol != null && memberSymbol.ToString().StartsWith(NeededNamespace))
                     {
-                        var typeArgument = invocation.ArgumentList.Arguments.First();
-                        if (typeArgument.Expression is ObjectCreationExpressionSyntax objectCreation)
+                        if (invocation.ArgumentList.Arguments.Count > 0)
                         {
-                            //TODO : check type of created object;
-                        }
-                        else
-                        {
-                            var expressionFromArgument = typeArgument.Expression;
-
-                            var typeInfo = ctx.SemanticModel.GetTypeInfo(expressionFromArgument); //Maybe should extract the method for reuse
-
-                            if (typeInfo.Type?.ToString().EndsWith("Singleton") ?? false)
+                            var typeArgument = invocation.ArgumentList.Arguments.First();
+                            if (typeArgument.Expression is ObjectCreationExpressionSyntax objectCreation)
                             {
-                                //TODO : check the MethodExpression name
-                                ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                                //TODO : check type of created object;
+                            }
+                            else
+                            {
+                                if (memberAccessExpression.Name.ToString() != "AddSingleton")
+                                {
+                                    ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                                }
                             }
                         }
-                    }
-                    else //TODO : check if we works with generic overload
-                    {
+                        else //TODO : check if we works with generic overload
+                        {
 
+                        }
                     }
                 }
             }
