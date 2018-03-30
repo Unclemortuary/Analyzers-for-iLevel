@@ -42,34 +42,53 @@ namespace iLevel.CodeAnalysis.BestPractices
                     var memberSymbol = ctx.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
                     if (memberSymbol != null && memberSymbol.ToString().StartsWith(NeededNamespace))
                     {
-                        if (invocation.ArgumentList.Arguments.Count > 0)
-                        {
-                            var typeArgument = invocation.ArgumentList.Arguments.First();
-                            if (typeArgument.Expression is ObjectCreationExpressionSyntax objectCreation)
-                            {
-                                //TODO : check type of created object;
-                            }
-                            else
-                            {
-                                if (memberAccessExpression.Name.ToString() != "AddSingleton")
-                                {
-                                    ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
-                                }
-                            }
-                        }
-                        else //TODO : check if we works with generic overload
+                        if (false) //generic
                         {
 
+                        }
+                        else
+                        {
+                            if (invocation.ArgumentList.Arguments.Count > 0)
+                            {
+                                var firstArgument = invocation.ArgumentList.Arguments.First();
+                                if (firstArgument.Expression is SimpleLambdaExpressionSyntax lambda)
+                                {
+                                    if (lambda.Body is ObjectCreationExpressionSyntax objectCreation) //if we simply create new object via lambda
+                                    {
+                                        if (objectCreation.Type?.ToString().EndsWith("Singleton") ?? false &&
+                                            memberAccessExpression.Name.ToString() != "AddSingleton")
+                                        {
+                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                                        }
+                                    }
+                                    else //more tricky cases must go here
+                                    {
+                                        //probably should check is it a single argument
+
+                                        var argumentType = ctx.SemanticModel.GetTypeInfo(lambda.Body);
+                                        if (argumentType.Type?.ToString().EndsWith("Singleton") ?? false &&
+                                        memberAccessExpression.Name.ToString() != "AddSingleton")
+                                        {
+                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (firstArgument.Expression is TypeOfExpressionSyntax typeofExpression)
+                                    {
+                                        if ((typeofExpression.Type?.ToString().EndsWith("Singleton") ?? false) &&
+                                            memberAccessExpression.Name.ToString() != "AddSingleton")
+                                        {
+                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
-
-    //TODO:
-    
-    
-    //3) - check that method symbol name is a AddSingleton, if not - create a rule
-    //4) - do the same for the generic parameter
 }
