@@ -1,27 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Linq;
 using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis;
+using iLevel.CodeAnalysis.BestPractices.Common;
 
 namespace iLevel.CodeAnalysis.BestPractices
 {
-    /// <summary>
-    /// Analyze registration in .net core DI container services that ends with singleton (ex. - ConnectionServiceSingleton)
-    /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class SingletonServiceRegistrationAnalyzer : DiagnosticAnalyzer
+    class SingletonServiceRegistrationAnalyzer : DiagnosticAnalyzer
     {
-        public const string DiagnosticId = "ILVL0003";
-
+        public const string DiagnosticId = "ILVL0004";
         private static readonly LocalizableString Title = "Singleton service registered in wrong way";
         private static readonly LocalizableString MessageFormat = "Singleton service must be registered throught the method \"AddSingleton\" in order to avoid possible perfomance reducing";
         private const string Category = "iLevel.BestPractises";
-
-        private const string NeededNamespace = "Microsoft.Extensions.DependencyInjection.IServiceCollection";
 
         private static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true);
 
@@ -37,50 +30,46 @@ namespace iLevel.CodeAnalysis.BestPractices
             if (ctx.Node is InvocationExpressionSyntax invocation)
             {
                 var memberAccessExpression = invocation.Expression as MemberAccessExpressionSyntax;
-                if (memberAccessExpression.Name.ToString().StartsWith("Add"))
+                if (Constants.NotSingletonAddServiceMethodNames.Select(x => x.Contains(memberAccessExpression.Name.ToString())).Any())
                 {
                     var memberSymbol = ctx.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
-                    if (memberSymbol != null && memberSymbol.ToString().StartsWith(NeededNamespace))
-                    {
-                        if (false) //generic
-                        {
 
-                        }
-                        else
+                    if (memberSymbol != null && memberSymbol.ToString().StartsWith(Constants.IServiceCollectionNamespace))
+                    {
+                        if (!memberSymbol.IsGenericMethod) //We already have analyzer for generics
                         {
                             if (invocation.ArgumentList.Arguments.Count > 0)
                             {
                                 var firstArgument = invocation.ArgumentList.Arguments.First();
+
                                 if (firstArgument.Expression is SimpleLambdaExpressionSyntax lambda)
                                 {
                                     if (lambda.Body is ObjectCreationExpressionSyntax objectCreation) //if we simply create new object via lambda
                                     {
-                                        if (objectCreation.Type?.ToString().EndsWith("Singleton") ?? false &&
-                                            memberAccessExpression.Name.ToString() != "AddSingleton")
+                                        if (objectCreation.Type?.ToString().Contains("Singleton") ?? false)
                                         {
-                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, GetNodeLocation(ctx.Node)));
                                         }
                                     }
-                                    else //more tricky cases must go here
+                                    else //Handle only case when we pass to lambda already created object 
                                     {
-                                        //probably should check is it a single argument
-
                                         var argumentType = ctx.SemanticModel.GetTypeInfo(lambda.Body);
-                                        if (argumentType.Type?.ToString().EndsWith("Singleton") ?? false &&
-                                        memberAccessExpression.Name.ToString() != "AddSingleton")
+
+                                        if (argumentType.Type?.ToString().Contains("Singleton") ?? false)
                                         {
-                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, GetNodeLocation(ctx.Node))); // TODO : pass location of MethodExpression
                                         }
                                     }
                                 }
-                                else
+                                else //First argument of non lambda Add.. methods is always Type
                                 {
-                                    if (firstArgument.Expression is TypeOfExpressionSyntax typeofExpression)
+                                    if (firstArgument.Expression is TypeOfExpressionSyntax typeofExpression) //Handle only typeof case
                                     {
-                                        if ((typeofExpression.Type?.ToString().EndsWith("Singleton") ?? false) &&
-                                            memberAccessExpression.Name.ToString() != "AddSingleton")
+                                        if (typeofExpression.Type?.ToString().Contains("Singleton") ?? false)
                                         {
-                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, ctx.Node.GetLocation())); // TODO : pass location of MethodExpression
+                                            var loca = GetNodeLocation(ctx.Node);
+
+                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, GetNodeLocation(ctx.Node))); // TODO : pass location of MethodExpression
                                         }
                                     }
                                 }
@@ -89,6 +78,14 @@ namespace iLevel.CodeAnalysis.BestPractices
                     }
                 }
             }
+        }
+
+        private Location GetNodeLocation(SyntaxNode node)
+        {
+            var methodIdentifierName = node.DescendantNodes()
+                .Where(n => n is IdentifierNameSyntax identifier && identifier.ToString().StartsWith("Add"))
+                .First();
+            return methodIdentifierName.GetLocation();
         }
     }
 }
