@@ -18,7 +18,7 @@ namespace iLevel.CodeAnalysis.BestPractices
 
         private static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true);
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -29,7 +29,7 @@ namespace iLevel.CodeAnalysis.BestPractices
         {
             if (ctx.Node is InvocationExpressionSyntax invocation)
             {
-                var memberAccessExpression = invocation.Expression as MemberAccessExpressionSyntax;
+                var memberAccessExpression = invocation.Expression as MemberAccessExpressionSyntax; 
                 if (Constants.NotSingletonAddServiceMethodNames.Select(x => x.Contains(memberAccessExpression.Name.ToString())).Any())
                 {
                     var memberSymbol = ctx.SemanticModel.GetSymbolInfo(invocation.Expression).Symbol as IMethodSymbol;
@@ -57,7 +57,7 @@ namespace iLevel.CodeAnalysis.BestPractices
 
                                         if (argumentType.Type?.ToString().Contains("Singleton") ?? false)
                                         {
-                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, GetNodeLocation(ctx.Node))); // TODO : pass location of MethodExpression
+                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, GetNodeLocation(ctx.Node)));
                                         }
                                     }
                                 }
@@ -67,9 +67,7 @@ namespace iLevel.CodeAnalysis.BestPractices
                                     {
                                         if (typeofExpression.Type?.ToString().Contains("Singleton") ?? false)
                                         {
-                                            var loca = GetNodeLocation(ctx.Node);
-
-                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, GetNodeLocation(ctx.Node))); // TODO : pass location of MethodExpression
+                                            ctx.ReportDiagnostic(Diagnostic.Create(Rule, GetNodeLocation(ctx.Node)));
                                         }
                                     }
                                 }
