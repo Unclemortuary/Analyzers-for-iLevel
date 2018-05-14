@@ -6,6 +6,8 @@ namespace iLevel.CodeAnalysis.BestPractices.Common
     {
         public const string IServiceCollectionNamespace = "Microsoft.Extensions.DependencyInjection.IServiceCollection";
 
+        public const string DomainEntitiesNamespace = "iLevel.DataQueryTool.Domain.Entities";
+
         public const string FiltersServiceDocumentName = "FiltersService";
 
         public const string GridDataServiceDocumentName = "GridDataService";
