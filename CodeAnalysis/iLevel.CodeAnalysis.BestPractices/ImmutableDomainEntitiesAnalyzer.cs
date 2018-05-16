@@ -45,18 +45,16 @@ namespace iLevel.CodeAnalysis.BestPractices
                 {
                     if (propDeclarationSymbol.SetMethod != null)
                     {
-                        var containingClass = propDeclarationSymbol.ContainingSymbol as INamedTypeSymbol;
+                        var containingClass = propDeclarationSymbol.ContainingSymbol as ITypeSymbol;
 
                         if (containingClass?.TypeKind == TypeKind.Class)
                         {
-                            var baseType = containingClass.BaseType;
-
-                            if (baseType?.TypeKind == TypeKind.Interface)
+                            if (containingClass.Interfaces.Any())
                             {
-                                if (IsInterfaceAreImmutable(baseType))
-                                {
+                                var firstInterface = containingClass.Interfaces.First(); //TODO: handle all interfaces
+
+                                if (IsInterfaceAreImmutable(firstInterface))
                                     ctx.ReportDiagnostic(Diagnostic.Create(Rule, propDeclarationSymbol.SetMethod.Locations.First()));
-                                }
                             }
                         }
                     }
