@@ -45,10 +45,28 @@ namespace iLevel.CodeAnalysis.BestPractices
                 {
                     if (propDeclarationSymbol.SetMethod != null)
                     {
-                        ctx.ReportDiagnostic(Diagnostic.Create(Rule, propDeclarationSymbol.SetMethod.Locations.First()));
+                        var containingClass = propDeclarationSymbol.ContainingSymbol as INamedTypeSymbol;
+
+                        if (containingClass?.TypeKind == TypeKind.Class)
+                        {
+                            var baseType = containingClass.BaseType;
+
+                            if (baseType?.TypeKind == TypeKind.Interface)
+                            {
+                                if (IsInterfaceAreImmutable(baseType))
+                                {
+                                    ctx.ReportDiagnostic(Diagnostic.Create(Rule, propDeclarationSymbol.SetMethod.Locations.First()));
+                                }
+                            }
+                        }
                     }
                 }
             }
+        }
+
+        private bool IsInterfaceAreImmutable(INamedTypeSymbol baseInterface)
+        {
+            throw new NotImplementedException();
         }
     }
 }
