@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Linq;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
 using iLevel.CodeAnalysis.BestPractices.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -39,8 +36,6 @@ namespace iLevel.CodeAnalysis.BestPractices
             {
                 var propDeclarationSymbol = ctx.SemanticModel.GetDeclaredSymbol(propDeclaration);
 
-                var sus = propDeclarationSymbol.ContainingNamespace;
-
                 if (propDeclarationSymbol.ContainingNamespace.ToString().StartsWith(Constants.DomainEntitiesNamespace))
                 {
                     if (propDeclarationSymbol.SetMethod != null)
@@ -51,10 +46,15 @@ namespace iLevel.CodeAnalysis.BestPractices
                         {
                             if (containingClass.Interfaces.Any())
                             {
-                                var firstInterface = containingClass.Interfaces.First(); //TODO: handle all interfaces
+                                for (int i = 0; i < containingClass.Interfaces.Count(); i++)
+                                {
+                                    var _interface = containingClass.Interfaces[i];
 
-                                if (IsInterfaceAreImmutable(firstInterface))
-                                    ctx.ReportDiagnostic(Diagnostic.Create(Rule, propDeclarationSymbol.SetMethod.Locations.First()));
+                                    if (IsInterfacePropertyImmutable(_interface, propDeclarationSymbol))
+                                        return;
+                                }
+
+                                ctx.ReportDiagnostic(Diagnostic.Create(Rule, propDeclarationSymbol.SetMethod.Locations.First()));
                             }
                         }
                     }
@@ -62,9 +62,13 @@ namespace iLevel.CodeAnalysis.BestPractices
             }
         }
 
-        private bool IsInterfaceAreImmutable(INamedTypeSymbol baseInterface)
+        private bool IsInterfacePropertyImmutable(INamedTypeSymbol baseInterface, IPropertySymbol property)
         {
-            throw new NotImplementedException();
+            var interfaceProperty = baseInterface.GetMembers(property.Name)
+                .OfType<IPropertySymbol>()
+                .FirstOrDefault(p => p.Type == property.Type);
+
+            return interfaceProperty == null ? false : interfaceProperty.SetMethod == null;
         }
     }
 }
