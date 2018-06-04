@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 
 namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
@@ -25,6 +26,16 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         internal static string VisualBasicDefaultExt = "vb";
         internal static string TestProjectName = "TestProject";
 
+        private static List<PortableExecutableReference> GetAssemblies(IEnumerable<string> assemblies)
+        {
+            var trustedAssembliesPaths = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator);
+
+            return trustedAssembliesPaths
+                .Where(p => assemblies.Contains(Path.GetFileNameWithoutExtension(p)))
+                .Select(p => MetadataReference.CreateFromFile(p))
+                .ToList();
+        }
+
         #region  Get Diagnostics
 
         /// <summary>
@@ -33,10 +44,11 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source classes are in</param>
         /// <param name="analyzer">The analyzer to be run on the sources</param>
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
         /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
-        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer)
+        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer, IEnumerable<string> additionalAssemblies = null)
         {
-            return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language));
+            return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language, additionalAssemblies));
         }
 
         /// <summary>
@@ -103,15 +115,16 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// </summary>
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source code is in</param>
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
         /// <returns>A Tuple containing the Documents produced from the sources and their TextSpans if relevant</returns>
-        private static Document[] GetDocuments(string[] sources, string language)
+        private static Document[] GetDocuments(string[] sources, string language, IEnumerable<string> additionalAssemblies = null)
         {
             if (language != LanguageNames.CSharp && language != LanguageNames.VisualBasic)
             {
                 throw new ArgumentException("Unsupported Language");
             }
 
-            var project = CreateProject(sources, language);
+            var project = CreateProject(sources, language, additionalAssemblies);
             var documents = project.Documents.ToArray();
 
             if (sources.Length != documents.Length)
@@ -127,10 +140,11 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// </summary>
         /// <param name="source">Classes in the form of a string</param>
         /// <param name="language">The language the source code is in</param>
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
         /// <returns>A Document created from the source string</returns>
-        protected static Document CreateDocument(string source, string language = LanguageNames.CSharp)
+        protected static Document CreateDocument(string source, string language = LanguageNames.CSharp, IEnumerable<string> additionalAssemblies = null)
         {
-            return CreateProject(new[] { source }, language).Documents.First();
+            return CreateProject(new[] { source }, language, additionalAssemblies).Documents.First();
         }
 
         /// <summary>
@@ -138,8 +152,9 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
         /// </summary>
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source code is in</param>
+        /// <param name="additionalAssemblies">Specific system assemblies that needed for test compilation</param>
         /// <returns>A Project created out of the Documents created from the source strings</returns>
-        private static Project CreateProject(string[] sources, string language = LanguageNames.CSharp)
+        private static Project CreateProject(string[] sources, string language = LanguageNames.CSharp, IEnumerable<string> additionalAssemblies = null)
         {
             string fileNamePrefix = DefaultFilePathPrefix;
             string fileExt = language == LanguageNames.CSharp ? CSharpDefaultFileExt : VisualBasicDefaultExt;
@@ -153,6 +168,11 @@ namespace iLevel.CodeAnalysis.BestPractices.Tests.Common
                 .AddMetadataReference(projectId, SystemCoreReference)
                 .AddMetadataReference(projectId, CSharpSymbolsReference)
                 .AddMetadataReference(projectId, CodeAnalysisReference);
+
+            if (additionalAssemblies != null)
+            {
+                solution = solution.AddMetadataReferences(projectId, GetAssemblies(additionalAssemblies));
+            }
 
             int count = 0;
             foreach (var source in sources)
